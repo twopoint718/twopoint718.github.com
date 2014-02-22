@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>sencjw - nand2tetris: low-level love</title>
+    <link rel="stylesheet" type="text/css" href="../css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="../css/default.css" />
+    <link rel="stylesheet" type="text/css" href="../css/syntax.css" />
+  </head>
+  <body>
+    <div class="content">
+
+      <header>
+        <h1>sencjw</h1>
+        <h2>a place I put stuff</h2>
+      </header>
+
+      <nav>
+        <ul>
+          <li><a href="../">Home</a></li>
+          <li><a href="../archive.html">Blog Archive</a></li>
+          <li><a href="../contact.html">Contact</a></li>
+          <li><a href="../interviews.html">Interviews</a></li>
+          <li><a href="../talks.html">Talks</a></li>
+          <li><a href="../the_square_root_of_christmas.html">The Square Root of Christmas</a></li>
+          <li><a href="../transparent_web.html">The Transparent Web (book)</a></li>
+          <li><a href="../writings.html">Writings</a></li>
+        </ul>
+      </nav>
+
+      <main>
+        <article>
+  <header>
+    <h1>nand2tetris: low-level love</h1>
+    <p>
+      Posted on August  7, 2013
+      
+    </p>
+  </header>
+
+  <p>I’ve been working through <em>The Elements of Computing Systems</em>, or as it is sometimes called <a href="http://nand2tetris.org">nand2tetris</a>. This is a fun course where you start out by being given (say: from God) the humble nand gate (file photo below):</p>
+<p><img src="http://upload.wikimedia.org/wikipedia/commons/e/e6/NAND_ANSI_Labelled.svg" width="300" alt="Schematic of a nand gate"></p>
+<p>And here’s a nude photo (showing how one would be implemented):</p>
+<p><img src="http://upload.wikimedia.org/wikipedia/commons/d/d4/TTL_npn_nand.svg" width="300" alt="Electrical schematic of a nand gate"></p>
+<p>But as far as nand2tetris is concerned, you can just assume that the above is a fact of life. You have a nand tree. So what do you do? well you start on an adventure where you define <em>Not</em> then <em>And</em> then <em>Nor</em> and, well you get the idea. Soon you find that you have a working <a href="https://en.wikipedia.org/wiki/Arithmetic_logic_unit">ALU</a>.</p>
+<p>I’m currently on the cusp of making the hardware to software jump. All along I’ve been having a blast wiring up these little beasties in <a href="https://en.wikipedia.org/wiki/Hardware_description_language">HDL</a></p>
+<p>The course finishes up with implementing cool software in a HLL language. I haven’t peeped this far ahead but it is supposed to be akin to Java. Oh yeah, by the time you get to this point you’ll have implemented the compiler for this language, the VM that it runs in, the raw machine code the VM is written in, the CPU that runs that machine code, and so on. It goes all the way back to that humble nand gate that you started out with.</p>
+<p>I hope to post some updates as I progress through the course, <del>but the quickest way is to check my commits over on my n2t github project.</del></p>
+<p><em>Edit: sorry to say this, but I’ve taken down that repo since it conflicts with the wishes of the authors of the course.</em></p>
+<p>As a slight digression, but surely belonging here, this has been something of a summer-o-hardware for me. I started reading <a href="http://www.charlespetzold.com/code/">CODE</a> by Charles Petzold a while back and the bottom-up description of computing that he laid out was intoxicating. I had to learn more and get my hands dirty with bits and bytes. And that’s when my hardware voyage began.</p>
+<p>In keeping with this theme, here’s a short reading list if you want to blast your brain with computing. In fact, I bet that if you were to go through all these books it’d be like getting a degree in computer science – with a minor in cool-nerd history:</p>
+<ul>
+<li><a href="http://www.amazon.com/dp/1400096235">The Information</a> by James Gleick</li>
+<li><a href="http://www.amazon.com/Elements-Computing-Systems-Building-Principles/dp/0262640686">The Elements of Computing Systems</a> by Nisan and Schocken</li>
+<li><a href="http://www.charlespetzold.com/code/">CODE</a> by Charles Petzold</li>
+<li><a href="http://computationbook.com">Understanding Computation</a> by Tom Stuart</li>
+<li><a href="http://www.amazon.com/Gödel-Escher-Bach-Eternal-Golden/dp/0465026567">Gödel, Escher, Bach</a> by Douglas R. Hofstadter</li>
+</ul>
+<p>There you have it. Go off and hack hardware!</p>
+</article>
+
+      </main>
+
+    </div>
+  </body>
+</html>

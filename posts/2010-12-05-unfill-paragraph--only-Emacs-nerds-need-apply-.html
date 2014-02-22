@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>sencjw - unfill-paragraph (only Emacs nerds need apply)</title>
+    <link rel="stylesheet" type="text/css" href="../css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="../css/default.css" />
+    <link rel="stylesheet" type="text/css" href="../css/syntax.css" />
+  </head>
+  <body>
+    <div class="content">
+
+      <header>
+        <h1>sencjw</h1>
+        <h2>a place I put stuff</h2>
+      </header>
+
+      <nav>
+        <ul>
+          <li><a href="../">Home</a></li>
+          <li><a href="../archive.html">Blog Archive</a></li>
+          <li><a href="../contact.html">Contact</a></li>
+          <li><a href="../interviews.html">Interviews</a></li>
+          <li><a href="../talks.html">Talks</a></li>
+          <li><a href="../the_square_root_of_christmas.html">The Square Root of Christmas</a></li>
+          <li><a href="../transparent_web.html">The Transparent Web (book)</a></li>
+          <li><a href="../writings.html">Writings</a></li>
+        </ul>
+      </nav>
+
+      <main>
+        <article>
+  <header>
+    <h1>unfill-paragraph (only Emacs nerds need apply)</h1>
+    <p>
+      Posted on December  5, 2010
+      
+    </p>
+  </header>
+
+  <p>I usually keep plain text at a nice and tidy 72 columns (give or take, but certainly under 80!). But there are times when it is necessary to have code that will be folded (word-wrapped) by the end user. Think of those text boxes on websites where the result is going to be displayed on some website in a totally unformatted way. In this case you want the text to be one long line per paragraph with a blank line separating each. That way, the text is as wide as the browser window or otherwise follows user preferences (see <a href="http://www.mozilla.org/unix/customizing.html#usercss">http://www.mozilla.org/unix/customizing.html#usercss</a> for how to do this in Firefox). Since I’m always hitting M-q in Emacs, my code’s always formatted at 72ish columns. The following bit of Emacs Lisp lets you unfill-lines, that is it strips out newline characters within a paragraph.</p>
+<pre class="sourceCode CommonLisp"><code class="sourceCode commonlisp"><span class="co">;; Stefan Monnier &lt;foo at acm.org&gt;. It is the opposite of fill-paragraph</span>
+<span class="co">;; Takes a multi-line paragraph and makes it into a single line of text.</span>
+
+(<span class="kw">defun</span><span class="fu"> unfill-paragraph </span>()
+    (interactive)
+    (<span class="kw">let</span> ((fill-column (point-max)))
+    (fill-paragraph <span class="kw">nil</span>)))
+
+(global-set-key (kbd <span class="st">&quot;C-c M-q&quot;</span>) 'unfill-paragraph)</code></pre>
+</article>
+
+      </main>
+
+    </div>
+  </body>
+</html>

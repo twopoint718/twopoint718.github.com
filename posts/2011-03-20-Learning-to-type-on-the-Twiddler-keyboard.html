@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>sencjw - Learning to type on the Twiddler keyboard</title>
+    <link rel="stylesheet" type="text/css" href="../css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="../css/default.css" />
+    <link rel="stylesheet" type="text/css" href="../css/syntax.css" />
+  </head>
+  <body>
+    <div class="content">
+
+      <header>
+        <h1>sencjw</h1>
+        <h2>a place I put stuff</h2>
+      </header>
+
+      <nav>
+        <ul>
+          <li><a href="../">Home</a></li>
+          <li><a href="../archive.html">Blog Archive</a></li>
+          <li><a href="../contact.html">Contact</a></li>
+          <li><a href="../interviews.html">Interviews</a></li>
+          <li><a href="../talks.html">Talks</a></li>
+          <li><a href="../the_square_root_of_christmas.html">The Square Root of Christmas</a></li>
+          <li><a href="../transparent_web.html">The Transparent Web (book)</a></li>
+          <li><a href="../writings.html">Writings</a></li>
+        </ul>
+      </nav>
+
+      <main>
+        <article>
+  <header>
+    <h1>Learning to type on the Twiddler keyboard</h1>
+    <p>
+      Posted on March 20, 2011
+      
+    </p>
+  </header>
+
+  <p>I recently got a twiddler chorded keyboard (I love it). My two main goals with it are to be able to use it while doing things like giving talks, because it is like having one of those presentation clickers yet at the same time being able to competently type with it. And the second goal is to use it on my smartphone as a better alternative to the on-screen keyboard. I just want to make a little aside on the second goal. It’s not totally clear to me how to use an external USB keyboard with Android (though I have some leads) but things look generally promising.</p>
+<p>Either use, of course, assumes that I can type on the crazy thing. I’m one of those people that find it fun to try and re-wire my brain to do new things and I figure that if I switched to dvorak (and have been using it for about 10 years) that I can tackle this thing! I decided to do some drills with the Twiddler so that I get to the point where I can use it for day-to-day stuff, from then on it’ll bootstrap itself through frequent use. That, by the way, was roughly my technique for learning dvorak back in the day</p>
+<ol style="list-style-type: decimal">
+<li>Print out the layout and tape it up at eye-level, this breaks you of the habit of looking at the keys (they won’t help you if you remap the keyboard in software)</li>
+<li>Do simple drills of the home row (this is great on Dvorak because you can form TONS of words)</li>
+<li>Expand the drills to less frequently used letters and characters</li>
+<li>Now that you can type all words, even if you are slow, get on IM or IRC in a low-traffic channel that you would like to participate in, and just converse. This will provide both motivation and practice without the feeling of banging your head against the wall.</li>
+<li>Do this daily or almost-daily for about 4-8 weeks (that’s about how long it took me to match and then exceed my QWERTY speed)</li>
+</ol>
+<p>To deal with steps 2 and 3 on the twiddler, I wrote this short python script that pulls words out out /usr/share/dict/words that can be typed without any chord (open), using the first chord key (1st or “L”), and finally the second chord key (2nd or “M”). I don’t have the third chord key on here because using just the first and second is sufficient for all letters. Here’s the script:</p>
+<pre class="sourceCode python"><code class="sourceCode python"><span class="ch">import</span> random
+
+<span class="kw">def</span> all_from(target_list, input_list):
+    <span class="kw">for</span> c in input_list:
+        <span class="kw">if</span> not c in target_list:
+            <span class="kw">return</span> <span class="ot">False</span>
+    <span class="kw">return</span> <span class="ot">True</span>
+
+<span class="kw">def</span> first_set(input_word):
+    <span class="kw">return</span> all_from(<span class="st">&quot;abcdefghABCDEFGH&quot;</span>, input_word)
+
+<span class="kw">def</span> second_set(input_word):
+    <span class="kw">return</span> all_from(<span class="st">&quot;ijklmnopqIJKLMNOPQ&quot;</span>, input_word)
+
+<span class="kw">def</span> third_set(input_word):
+    <span class="kw">return</span> all_from(<span class="st">&quot;rstuvwxyzRSTUVWXYZ&quot;</span>, input_word)
+
+<span class="kw">def</span> fourth_set(input_word):
+    <span class="kw">return</span> all_from(<span class="st">&quot;.,;'</span><span class="ch">\&quot;</span><span class="st">?!-&quot;</span>, input_word)
+
+<span class="kw">def</span> search_words(words, key_set=first_set):
+    out = []
+    <span class="kw">for</span> word in words:
+        <span class="kw">if</span> key_set(word) and <span class="dt">len</span>(word) &gt; <span class="dv">1</span>:
+            out.append(word)
+    <span class="kw">return</span> out
+
+<span class="kw">if</span> <span class="dt">__name__</span> == <span class="st">&quot;__main__&quot;</span>:
+    get_words = <span class="dv">10</span>
+    fname = <span class="st">&quot;/usr/share/dict/words&quot;</span>
+    wordlist = <span class="dt">open</span>(fname, <span class="st">&quot;r&quot;</span>).read().split(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)
+
+    first = search_words(wordlist, first_set)
+    second = search_words(wordlist, second_set)
+    third = search_words(wordlist, third_set)
+    <span class="co">#fourth = search_words(wordlist, fourth_set) # need wordlist w/ punct.</span>
+
+    <span class="kw">print</span> <span class="st">&quot;open: &quot;</span>, <span class="st">&quot; &quot;</span>.join(random.sample(first, get_words))
+    <span class="kw">print</span> <span class="st">&quot;1st:  &quot;</span>, <span class="st">&quot; &quot;</span>.join(random.sample(second, get_words))
+    <span class="kw">print</span> <span class="st">&quot;2nd:  &quot;</span>, <span class="st">&quot; &quot;</span>.join(random.sample(third, get_words))
+    <span class="co">#print &quot;3rd:  &quot;, &quot; &quot;.join(random.sample(fourth, get_words))</span></code></pre>
+</article>
+
+      </main>
+
+    </div>
+  </body>
+</html>

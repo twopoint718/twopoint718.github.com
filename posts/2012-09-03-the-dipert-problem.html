@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>sencjw - the dipert problem</title>
+    <link rel="stylesheet" type="text/css" href="../css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="../css/default.css" />
+    <link rel="stylesheet" type="text/css" href="../css/syntax.css" />
+  </head>
+  <body>
+    <div class="content">
+
+      <header>
+        <h1>sencjw</h1>
+        <h2>a place I put stuff</h2>
+      </header>
+
+      <nav>
+        <ul>
+          <li><a href="../">Home</a></li>
+          <li><a href="../archive.html">Blog Archive</a></li>
+          <li><a href="../contact.html">Contact</a></li>
+          <li><a href="../interviews.html">Interviews</a></li>
+          <li><a href="../talks.html">Talks</a></li>
+          <li><a href="../the_square_root_of_christmas.html">The Square Root of Christmas</a></li>
+          <li><a href="../transparent_web.html">The Transparent Web (book)</a></li>
+          <li><a href="../writings.html">Writings</a></li>
+        </ul>
+      </nav>
+
+      <main>
+        <article>
+  <header>
+    <h1>the dipert problem</h1>
+    <p>
+      Posted on September  3, 2012
+      
+    </p>
+  </header>
+
+  <p>Recently, <a href="http://alan.dipert.org/">Alan Dipert</a> dropped a bomb on the twittersphere with his posing of <a href="https://twitter.com/alandipert/status/241575872937750529">this question</a> (warning there are spoilers in the replies):</p>
+<p>“pop quiz: solve <a href="http://www.4clojure.com/problem/107">http://www.4clojure.com/problem/107</a> point-free. answer must be a function value! #clojure”</p>
+<p>In case your office has banned 4clojure for being a huge distraction, I’ll post the problem here:</p>
+<pre class="sourceCode clojure"><code class="sourceCode clojure">(<span class="kw">=</span> <span class="dv">256</span> ((__ <span class="dv">2</span>) <span class="dv">16</span>),
+       ((__ <span class="dv">8</span>) <span class="dv">2</span>))
+
+(<span class="kw">=</span> [<span class="dv">1</span> <span class="dv">8</span> <span class="dv">27</span> <span class="dv">64</span>] (<span class="kw">map</span> (__ <span class="dv">3</span>) [<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span> <span class="dv">4</span>]))
+
+(<span class="kw">=</span> [<span class="dv">1</span> <span class="dv">2</span> <span class="dv">4</span> <span class="dv">8</span> <span class="dv">16</span>] (<span class="kw">map</span> #((__ %) <span class="dv">2</span>) [<span class="dv">0</span> <span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span> <span class="dv">4</span>]))</code></pre>
+<p>In problem 107, your challenge is to write a function that satisfies all of these (it could be dropped in place of the <code>__</code>s above). I will let you go take a crack at solving it. Because up next is some serious spoiler action.</p>
+<p>Got your solution? I came up with this:</p>
+<pre class="sourceCode clojure"><code class="sourceCode clojure">(<span class="kw">fn</span> [x] (<span class="kw">fn</span> [y] (<span class="kw">reduce</span> <span class="kw">*</span> (<span class="kw">repeat</span> x y))))</code></pre>
+<p>or (what I was really doing) in Haskell:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">f ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span>
+f x y <span class="fu">=</span> foldl1 (<span class="fu">*</span>) (replicate x y)</code></pre>
+<p>We are doing manual exponentiation: “make a list of <em>y</em>s that is <em>x</em> in length (e.g. <code>replicate 8 2 == [2, 2, 2, 2, 2, 2, 2, 2]</code>). Then you just run multiplication through the list:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">foldl1 (<span class="fu">*</span>) [<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">2</span>] <span class="fu">==</span> <span class="dv">2</span> <span class="fu">*</span> <span class="dv">2</span> <span class="fu">*</span> <span class="dv">2</span> <span class="fu">*</span> <span class="fu">...</span> <span class="dv">2</span> <span class="fu">==</span> <span class="dv">256</span></code></pre>
+<p>Now comes the “Dipert Problem.” He has told us that we have to rewrite the solution (or any solution) using so-called <em>point-free</em> style. I’m sure that there’s more to it, but essentially that means that <em>we are not allowed to mention any variables!</em> When I first heard about this style, it sounded impossible! The cool thing is that it <em>isn’t</em> and it leads to some massively simple code. Let’s try it out.</p>
+<p>I’m going to start with my solution above called <code>f</code> and then write some successive versions of it, each time, I’ll remove a variable and call it the “next” version: <code>f1</code>, <code>f2</code>, okay? Cool.</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">f, f1,<span class="ot"> f2 ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span>
+f x y <span class="fu">=</span> foldl1 (<span class="fu">*</span>) (replicate x y)</code></pre>
+<p>For the first transformation, we need to get rid of the <code>y</code> that’s hanging off the end of both sides of our equation. We’ll need to juggle the innards a bit because here is what the types look like so far:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">foldl1<span class="ot"> (*) ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Int</span>
+replicate x<span class="ot"> y ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> [a]</code></pre>
+<p><code>replicate</code> takes two arguments and then produces a list that the <code>foldl1 (*)</code> wants to consume. The trouble is, and what tripped me up a bunch, is that I can’t just do this:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">foldl1 (<span class="fu">*</span>) <span class="fu">.</span> replicate</code></pre>
+<p>Wah, wah (sad trombone). GHCI tells me:</p>
+<pre><code>Expected type: Int -&gt; [c0]
+  Actual type: Int -&gt; a0 -&gt; [a0]</code></pre>
+<p>Okay, that makes sense, for the fold and replicate to “line up” for composition, replicate has to take one argument then produce a list. The crux is that composition (the “dot” or period in the code) only works for single-argument-functons:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">(.) ::</span> (b <span class="ot">-&gt;</span> c) <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> c</code></pre>
+<p>This is a little pipeline, but reversed because that’s how mathematics does it. It says “the right-side function takes an <em>a</em> and gives a <em>b</em>, and the left-side function expects a <em>b</em> and gives a <em>c</em>; now you can stitch them together and have a function that <em>skips</em> the <em>b</em> and takes you right from <em>a</em> to <em>c</em>.” But we have a function that looks like:</p>
+<pre><code>(a -&gt; b -&gt; c)</code></pre>
+<p>on the right-hand side; it won’t work. how do we convert a <code>(a -&gt; b -&gt; c)</code> to a <code>(a -&gt; (b -&gt; c))</code>? This way:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">{-</span>
+<span class="co">f x y =  foldl1 (*) ((replicate x) y)</span>
+<span class="co">f x y = (foldl1 (*) . (replicate x)) y</span>
+<span class="co">-}</span>
+f1 x  <span class="fu">=</span>  foldl1 (<span class="fu">*</span>) <span class="fu">.</span> (replicate x)</code></pre>
+<p><em>Note:</em> the first two lines are commented in case you are cut-n-pasting along. The first line just puts parenthesis in where they really are in haskell. Each time you see a function of two arguments, it <em>is really</em> a function which takes one argument and returns a function that expects the second argument! This weird but remarkable fact of haskell is called <a href="http://www.haskell.org/haskellwiki/Currying">currying</a>.</p>
+<p>Now, on to the second line, we see that we have the right types! (I am cheating a bit on types, if you like, you can define <code>rep</code> which <em>just</em> uses <code>Int</code>s)</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">replicate<span class="ot"> x ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> [<span class="dt">Int</span>]  <span class="co">-- cheating: where 'x' is a specific int</span>
+foldl1<span class="ot"> (*)  ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Int</span>
+
+foldl1 (<span class="fu">*</span>) <span class="fu">.</span> replicate<span class="ot"> x ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span></code></pre>
+<p>And that brings us to <code>f1</code>! We used grouping and composition to move the <code>y</code> outside the computation and then we dropped it from both sides.</p>
+<p>Next we’ll tackle the x:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">{-</span>
+<span class="co">f x =  (foldl1 (*) .) (replicate x)</span>
+<span class="co">f x = ((foldl1 (*) .) . replicate) x</span>
+<span class="co">-}</span>
+f2 <span class="fu">=</span>   (foldl1 (<span class="fu">*</span>) <span class="fu">.</span>) <span class="fu">.</span> replicate</code></pre>
+<p>It may look different, but the same thing is going on. We can group the composition with the fold without changing anything. This is just like doing:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="dv">3</span> <span class="fu">+</span> <span class="dv">4</span> <span class="fu">==</span> (<span class="dv">3</span> <span class="fu">+</span>) <span class="dv">4</span></code></pre>
+<p>Next we do that same trick again where we can now compose the inner functions because the types line up (again, I’m simplifying types a bit):</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">((foldl1 (<span class="fu">*</span>) <span class="fu">.</span>) <span class="fu">.</span>)<span class="ot"> ::</span> (a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> [c]) <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> c</code></pre>
+<p>it looks a bit hairy, but in our case, it is just what we want! If I fill in the actual types we’ll be using, it becomes clearer:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">((foldl1 (<span class="fu">*</span>) <span class="fu">.</span>) <span class="fu">.</span>)<span class="ot"> ::</span> (<span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> [<span class="dt">Int</span>]) <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span></code></pre>
+<p>Booyah! This contraption takes a <em>function</em> of two <code>Ints</code> that produces a list of ints, <code>[Int]</code>. Well, that’s just what <code>replicate</code> is! So if we then feed in replicate:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">(foldl1 (<span class="fu">*</span>) <span class="fu">.</span>) <span class="fu">.</span><span class="ot"> replicate ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span></code></pre>
+<p>And that’s it, we have a point-free function that takes two <code>Int</code>s and returns an <code>Int</code>. And so that’s our last, and final function:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">f2 <span class="fu">=</span> (foldl1 (<span class="fu">*</span>) <span class="fu">.</span>) <span class="fu">.</span> replicate</code></pre>
+<p>In general, and I don’t know a term for this, but the operation of successive function composition lets us compose higher and higher arity functions together. Here’s a dumb example using my little point-free <code>succ</code> function:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">g ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span>
+g <span class="fu">=</span> (<span class="fu">+</span><span class="dv">1</span>)
+(g <span class="fu">.</span>)<span class="ot">       ::</span> (a <span class="ot">-&gt;</span> <span class="dt">Int</span>) <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">Int</span>
+(g <span class="fu">.</span>) <span class="fu">.</span>)<span class="ot">    ::</span> (a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> <span class="dt">Int</span>) <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> <span class="dt">Int</span>
+(g <span class="fu">.</span>) <span class="fu">.</span>) <span class="fu">.</span>)<span class="ot"> ::</span> (a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> c <span class="ot">-&gt;</span> <span class="dt">Int</span>) <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> c <span class="ot">-&gt;</span> <span class="dt">Int</span></code></pre>
+<p>Clear pattern. I kinda think of this as saying something like “please give me a function which <em>eventually</em> promises to give me what I want.” The <em>eventually</em> part is essentially “after you’ve collected all the stuff you need.” It would be trivially satisfied by some function that ignores its args and returns a constant:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">(((g <span class="fu">.</span>) <span class="fu">.</span>) <span class="fu">.</span>) (\x y z <span class="ot">-&gt;</span> <span class="dv">1</span>) <span class="dv">4</span> <span class="dv">5</span> <span class="dv">6</span> <span class="fu">==</span> <span class="dv">2</span></code></pre>
+<p>Remembering that <code>g</code> just increments, the x y z are <em>totally ignored</em>. The function supplied to the multiply-composed <code>g</code> is like some kind of integer “pre-processor”; the <em>x</em>, <em>y</em> and <em>z</em> can be whatever you need to do to figure out how to give g an integer. Or at least that’s how I’m thinking of it.</p>
+<p>I had a lot of fun trying to figure this out!</p>
+</article>
+
+      </main>
+
+    </div>
+  </body>
+</html>

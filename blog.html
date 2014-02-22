@@ -1,0 +1,563 @@
+<html>
+<head>
+   <title>sencjw - Blog</title>
+   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+   <link rel="stylesheet" type="text/css" href="css/screen.css" />
+   <link rel="stylesheet" type="text/css" media="print" 
+	 href="css/print.css" />
+   <link rel="alternate" type="application/rss+xml" title="RSS Feed"
+         href="blog.rss" />
+   <script src="js/jquery.min.js" 
+	   type="text/javascript"></script>
+   <script src="js/nav.js" type="text/javascript"></script>
+</head>
+<body>
+  <div id="doc3" class="yui-t1">
+    <div id="yui-main">
+      <div id="maincol" class="yui-b">
+<h1 id="blog">Blog</h1>
+<p>Here are recent entries. Page anchors are on <a href="http://en.wikipedia.org/wiki/ISO%20_8601">ISO 8601</a> dates (e.g. <em>2011-05-27</em>), so you can access the oldest entry like: <a href="blog.html#2010-11-13">blog.html#2010-11-13</a>. I’m still figuring out how to do permalinks and individual pages.</p>
+<h2 id="chihack"><a name="2013-11-08">ChiHack</a></h2>
+<p><small>2013-11-08</small></p>
+<p>As I continue my leisurely foray into the world of Haskell, I have come upon a bivouac of Haskellers near Chicago this weekend. Myself and a co worker from the office will be attending the first-ever <a href="https://plus.google.com/events/cc4njkf8kh5aho6soboisv6c7rc">ChiHack</a>. Maybe I can get someone to explain <a href="http://www.mpi-sws.org/~skilpat/backpack/">Backpack</a> to me.</p>
+<h2 id="reactive_record"><a name="2013-10-03">reactive_record</a></h2>
+<p><small>2013-10-03</small></p>
+<p>Just wanted to make a quick note that I have published my first gem, <a href="https://rubygems.org/gems/reactive_record">reactive_record</a>, on rubygems. It is a utility that lets you “export” constraints from your existing postgres database, creating Rails models.</p>
+<p>It is pretty early, but I have put in a lot of work and I hope that it is useful for your projects.</p>
+<h2 id="named-parameters-in-haskell"><a name="2013-09-14">named parameters in haskell</a></h2>
+<p><small>2013-09-14</small></p>
+<p>I was watching <a href="https://www.youtube.com/watch?v=rI8tNMsozo0">Rich Hickey’s keynote</a> for Rails Conf 2012. I’ve been watching a lot of talks lately because I’ve organized a series of conference talk screenings at my work. And that’s probably a different blog post…</p>
+<p>Anyhow, one thing that he mentioned that I don’t often think about is the complexity introduced with positional parameters. Let me explain:</p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">function</span> <span class="fu">foo</span>(x, y, z,) {...}</code></pre>
+<p>Requires that x, y, and z all be present in that exact order even if that’s not important:</p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">function</span> <span class="fu">make_person</span>(first, last, phone) {...}
+<span class="kw">function</span> <span class="fu">make_person</span>(last, first, phone) {...}
+<span class="kw">function</span> <span class="fu">make_person</span>(phone, first, last) {...}</code></pre>
+<p>If you encountered a wild <code>make_person</code>, you’d have to know which definition was the one that was used. The point is it really doesn’t matter that a person’s attributes are listed in that order. Any order is fine. But you’ve, implicitly, introduced a strict order-dependence here. Passing in a map/object/hash fixes this issue:</p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">function</span> <span class="fu">make_person</span>(opts) {
+  opts[<span class="st">&#39;first&#39;</span>] = ...
+  <span class="fu">opts</span>[<span class="st">&#39;last&#39;</span>] = ...
+  <span class="fu">opts</span>[<span class="st">&#39;phone&#39;</span>] = ...
+}</code></pre>
+<p>Haskell is pretty tied to the positional and unnamed argument thing. I was looking into how to do named and/or non-positional arguments.</p>
+<h3 id="datatype">Datatype</h3>
+<p>The first thing that occurred to me is to do something like this:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">import</span> Text.Printf
+
+<span class="kw">data</span> <span class="dt">Person</span> <span class="fu">=</span> <span class="dt">Person</span> {<span class="ot"> firstName ::</span> <span class="dt">String</span>
+                     ,<span class="ot"> lastName ::</span> <span class="dt">String</span>
+                     ,<span class="ot"> email ::</span> <span class="dt">String</span>
+                     }
+
+<span class="ot">formatAddress ::</span> <span class="dt">Person</span> <span class="ot">-&gt;</span> <span class="dt">String</span>
+formatAddress p <span class="fu">=</span> printf <span class="st">&quot;\&quot;%s %s\&quot; &lt;%s&gt;&quot;</span> f l e
+  <span class="kw">where</span>
+    f <span class="fu">=</span> firstName p
+    l <span class="fu">=</span> lastName p
+    e <span class="fu">=</span> email p</code></pre>
+<p>And then I call it like so:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">formatAddress <span class="dt">Person</span> { firstName <span class="fu">=</span> <span class="st">&quot;Chris&quot;</span>
+                     , lastName <span class="fu">=</span> <span class="st">&quot;Wilson&quot;</span>
+                     , email <span class="fu">=</span> <span class="st">&quot;chris@bendyworks.com&quot;</span>
+                     }</code></pre>
+<p>A slightly better tweak is to create a default that provides values for anything that’s missing (assuming that I have a function that just calls for one parameter):</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">formatEmail p <span class="fu">=</span> printf <span class="st">&quot;&lt;%s&gt;&quot;</span> (email p)
+
+defaultPerson <span class="fu">=</span> <span class="dt">Person</span> {firstName <span class="fu">=</span> <span class="st">&quot;&quot;</span>, lastName <span class="fu">=</span> <span class="st">&quot;&quot;</span>, email <span class="fu">=</span> <span class="st">&quot;&quot;</span>}</code></pre>
+<p>But that “infects” the call site with the <code>defaultPerson</code> argument:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">formatEmail defaultPerson {email<span class="fu">=</span><span class="st">&quot;chris@bendyworks.com&quot;</span>}</code></pre>
+<p>All the other, irrelevant arguments are defaulted by the <code>defaultPerson</code> constructor.</p>
+<h3 id="named-records">Named Records</h3>
+<p>This pulls in the big guns of template Haskell to abstract machinery something like what is spelled out above:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">{-# LANGUAGE TemplateHaskell #-}</span>
+
+<span class="kw">import</span> Data.NamedRecord
+<span class="kw">import</span> Text.Printf
+<span class="kw">import</span> Data.Name
+
+name <span class="st">&quot;firstName&quot;</span>
+name <span class="st">&quot;lastName&quot;</span>
+name <span class="st">&quot;email&quot;</span>
+
+record <span class="st">&quot;Person&quot;</span>
+    <span class="ot">`has`</span> <span class="st">&quot;firstName&quot;</span> <span class="fu">:=</span> <span class="ch">&#39;&#39;</span><span class="dt">String</span>
+    <span class="ot">`has`</span> <span class="st">&quot;lastName&quot;</span>  <span class="fu">:=</span> <span class="ch">&#39;&#39;</span><span class="dt">String</span>
+    <span class="ot">`has`</span> <span class="st">&quot;email&quot;</span>     <span class="fu">:=</span> <span class="ch">&#39;&#39;</span><span class="dt">String</span>
+
+<span class="ot">formatEmail ::</span> <span class="dt">Person</span> <span class="ot">-&gt;</span> <span class="dt">String</span>
+formatEmail p <span class="fu">=</span> printf <span class="st">&quot;&lt;%s&gt;&quot;</span> e
+  <span class="kw">where</span>
+    e <span class="fu">=</span> p <span class="ot">`get`</span> email</code></pre>
+<p>But it has a rather pleasant usage:</p>
+<pre><code>formatEmail (newPerson `set` email := &quot;chris@bendyworks.com&quot;)</code></pre>
+<p>There is also a nice way to do <a href="http://hackage.haskell.org/packages/archive/named-records/0.5/doc/html/Data-NamedRecord.html">default arguments</a>. Go check it out, the docs are good.</p>
+<h3 id="lenses">Lenses</h3>
+<p>Okay, I have to admit that I’m less sure about this. Metaphor-weary haskellers please forgive me, but lenses seem to be the space-based laser (SBL) of the Haskell world right now. While the idea is simple, you’d like a way to pinpoint a structure for observation or (destructive) modification, the actual infrastructure surrounding it is rather elaborate. On the <a href="https://www.youtube.com/watch?v=D6sva6hGJ-s">Haskell Cast #1</a>, Edward Kmett goes into the details of the lens library. A few “<a href="http://patternsinfp.wordpress.com/2011/01/31/lenses-are-the%20-coalgebras-for-the-costate-comonad/">lenses are the coalgebras for the costate comonad</a>”s are thrown around and there’s generally a lot sailing over my head.</p>
+<p>On iota of wisdom that I pulled down from the stratosphere was that lenses are a kind of “getter” and “setter”, albeit ones with firm FP grounding. These can be used to effectively create flexible parameters to functions. “Flexible” just means:</p>
+<ul>
+<li>a pool of parameters to draw from</li>
+<li>that are named rather than positional</li>
+<li>and not all have to pe present</li>
+</ul>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">{-# LANGUAGE TemplateHaskell #-}</span>
+<span class="kw">import</span> Control.Lens
+<span class="kw">import</span> Text.Printf
+
+<span class="kw">data</span> <span class="dt">Person</span> <span class="fu">=</span> <span class="dt">Person</span> { _<span class="ot">firstName ::</span> <span class="dt">String</span>
+                     , _<span class="ot">lastName ::</span> <span class="dt">String</span>
+                     , _<span class="ot">email ::</span> <span class="dt">String</span>
+                     }
+
+makeLenses <span class="ch">&#39;&#39;</span><span class="dt">Person</span>
+
+<span class="co">-- use the &quot;email&quot; getter</span>
+formatEmail p <span class="fu">=</span> printf <span class="st">&quot;&lt;%s&gt;&quot;</span> (p<span class="fu">^.</span>email)
+
+<span class="co">-- issues a warning, but works.</span>
+main <span class="fu">=</span> putStrLn <span class="fu">$</span> formatEmail (<span class="dt">Person</span>{_email<span class="fu">=</span><span class="st">&quot;chris@bendyworks.com&quot;</span>})</code></pre>
+<p>Whew. It feels like cheating, but I really like how this works. Lenses let me “focus” on each field in my data structure by name (or position).</p>
+<p>Lenses seem to fulfill the three bullets that I listed and they do so in the most “natural” way. I say that because, as Edward Kmett, goes into, lenses are useful for a bunch of other stuff and they compose really nicely:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">Person</span> <span class="fu">=</span> <span class="dt">Person</span> { <span class="co">-- ...like above...</span>
+                     , _phone <span class="fu">=</span> <span class="dt">Phone</span> { _number <span class="fu">=</span> <span class="st">&quot;...&quot;</span>, _type <span class="fu">=</span> <span class="st">&quot;mobile&quot;</span> }
+                     }
+
+<span class="kw">data</span> <span class="dt">Phone</span> <span class="fu">=</span> <span class="dt">Phone</span> { _<span class="ot">number ::</span> <span class="dt">String</span>, _<span class="ot">type ::</span> <span class="dt">String</span> }
+
+chris<span class="fu">^.</span>phone<span class="fu">^.</span><span class="kw">type</span> <span class="co">-- equals &quot;mobile&quot;</span></code></pre>
+<p>So, in summary, I feel that lenses provide a credible solution to the named-record/non-positional/keyword arguments problem. Go forth and hack.</p>
+<h2 id="code-budget"><a name="2013-08-20">code budget</a></h2>
+<p><small>2013-08-20</small></p>
+<p>At almost the moment a new project begins, we start the ritual of estimation. Guess how long this will take. Guess how much this will cost. How about if we change that feature to this feature? The goal of all this prognostication is to try to fit a potentially infinite product within the finite means we have available to us in terms of money, people, and (sometimes overlooked) will.</p>
+<p>These are all precious and limited resources that we must <em>spend</em>; we trade what we can afford for the software we want. Grouped among these precious and limited resources, I think we must include <em>lines of code</em>. As <a href="http://www.cs.utexas.edu/~EWD/transcriptions/EWD10xx/EWD1036.html">Dijkstra</a> noted, that lines of code added are being recorded in the wrong side of the ledger. This means that as code is added to a codebase the difficulty of making changes or future additions keeps going up. This has a self-limiting effect in the same way that a dollar budget is self-limiting: when you exceed the budget you should examine the goals and outcomes of the project.</p>
+<p>That’s my proposal. At the start of a project estimate the quantity of code needed to solve the business problem. This is hard in the same ways that other estimation is hard, but with time and practice, should be doable. When this budget is exceeded it should trigger some tough questions about the state that the project is in. Why have we used more lines of code than we thought? Could this be refactored? A benefit of the code budget is that it will force the team to examine the codebase at exactly the time that projects tend to be in maximum crunch mode. This hard check is a good thing that keeps everyone grounded in quality when all other external signals are screaming everything but.</p>
+<h2 id="nand2tetris-low-level-love"><a name="2013-08-07">nand2tetris: low-level love</a></h2>
+<p><small>2013-08-07</small></p>
+<p>I’ve been working through <em>The Elements of Computing Systems</em>, or as it is sometimes called <a href="http://nand2tetris.org">nand2tetris</a>. This is a fun course where you start out by being given (say: from God) the humble nand gate (file photo below):</p>
+<p><img src="http://upload.wikimedia.org/wikipedia/commons/e/e6/NAND_ANSI_Labelled.svg"
+     width="300"
+     alt="Schematic of a nand gate"></p>
+<p>And here’s a nude photo (showing how one would be implemented):</p>
+<p><img src="http://upload.wikimedia.org/wikipedia/commons/d/d4/TTL_npn_nand.svg"
+     width="300"
+     alt="Electrical schematic of a nand gate"></p>
+<p>But as far as nand2tetris is concerned, you can just assume that the above is a fact of life. You have a nand tree. So what do you do? well you start on an adventure where you define Not then And then Nor and, well you get the idea. Soon you find that you have a working <a href="https://en.wikipedia.org/wiki/Arithmetic_logic_unit">ALU</a>.</p>
+<p>I’m currently on the cusp of making the hardware to software jump. All along I’ve been having a blast wiring up these little beasties in <a href="https://en.wikipedia.org/wiki/Hardware_description_language">HDL</a></p>
+<p>The course finishes up with implementing cool software in a HLL language. I haven’t peeped this far ahead but it is supposed to be akin to Java. Oh yeah, by the time you get to this point you’ll have implemented the compiler for this language, the VM that it runs in, the raw machine code the VM is written in, the CPU that runs that machine code, and so on. It goes all the way back to that humble nand gate that you started out with.</p>
+<p>I hope to post some updates as I progress through the course, but the quickest way is to check my commits over on my <a href="https://github.com/twopoint718/n2t">n2t</a> github project.</p>
+<p>As a slight digression, but surely belonging here, this has been something of a summer-o-hardware for me. I started reading <a href="http://www.charlespetzold.com/code/">CODE</a> by Charles Petzold a while back and the bottom-up description of computing that he laid out was intoxicating. I had to learn more and get my hands dirty with bits and bytes. And that’s when my hardware voyage began.</p>
+<p>In keeping with this theme, here’s a short reading list if you want to blast your brain with computing. In fact, I bet that if you were to go through all these books it’d be like getting a degree in computer science – with a minor in cool-nerd history:</p>
+<ul>
+<li><a href="http://www.amazon.com/dp/1400096235">The Information</a> by James Gleick</li>
+<li><a href="http://www.amazon.com/Elements-Computing-Systems-Building-Principles/dp/0262640686">The Elements of Computing Systems</a> by Nisan and Schocken</li>
+<li><a href="http://www.charlespetzold.com/code/">CODE</a> by Charles Petzold</li>
+<li><a href="http://computationbook.com">Understanding Computation</a> by Tom Stuart</li>
+<li><a href="http://www.amazon.com/Gödel-Escher-Bach-Eternal-Golden/dp/0465026567">Gödel, Escher, Bach</a> by Douglas R. Hofstadter</li>
+</ul>
+<p>There you have it. Go off and hack hardware!</p>
+<h2 id="lists-out-of-lambdas-and-boxes-out-of-functions"><a name="2013-04-06">Lists out of lambdas and boxes out of functions</a></h2>
+<p><small>2013-04-06</small></p>
+<p>There’s a cool article by Steve Losh called <a href="http://stevelosh.com/blog/2013/03/list-out-of-lambda/">List out of Lambda</a> that reminded me, in a really good way, of a section in SICP. If you want to read the boiled-down scheme version that’s in SICP, here it is (my paraphrasing from <a href="http://mitpress.mit.edu/sicp/full-text/book/book-Z-H-14.html#%_sec_2.1.3">SICP section 2.1.3</a>)</p>
+<p>“cons” makes a list by putting an element onto the front of an existing list.</p>
+<pre><code>(cons 1 &#39;()) ; &#39;(1)</code></pre>
+<p>that’s empty list ‘() and a list with just “1” in it above’(1). There’s two other functions that deconstruct a list: ‘car’ and ‘cdr’, or head and tail (name’s not really important):</p>
+<pre><code>(car &#39;(1 2 3)) ; 1
+(cdr &#39;(1 2 3)) ; &#39;(2 3)</code></pre>
+<p>Car returns the head of the list and cdr returns the rest of the list (without the head). You’d think that ‘car’, ‘cdr’, and ‘cons’ would pretty much have to be built in functions, but actually they don’t!</p>
+<pre><code>(define (cons x y)
+  (define (dispatch m)
+    (cond ((= m 0) x)
+          ((= m 1) y)
+          (else (error &quot;Argument not 0 or 1 -- CONS&quot; m))))
+  dispatch)</code></pre>
+<p>This is the trickiest thing to grok, but then you’re in the clear. Calling ‘cons’ returns a function (called “dispatch”) which “closes” over its two arguments. That means that the function is implicitly storing x and y off where function arguments are stored. Dispatch takes a single argument, m, which acts like a kind of selector. If m == 0, then dispatch returns the first argument to cons, if m == 1, then dispatch returns the second argument to cons.</p>
+<pre><code>((cons 1 &#39;(2 3)) 0) ; 1
+((cons 1 &#39;(2 3)) 1) ; &#39;(2 3)</code></pre>
+<p>Now we just define car and cdr to do exactly this:</p>
+<pre><code>(define (car lst)
+  (lst 0))
+
+(define (cdr lst)
+  (lst 1))</code></pre>
+<p>Remember that the way that this works is that the list is being stored as a function so the only thing we can do is to call it!</p>
+<pre><code>(car (cons 1 &#39;(2 3))) ; 1
+(cdr (cons 1 &#39;(2 3))) ; &#39;(2 3)</code></pre>
+<p>Cool! We just built lists out of “nothing”. If you want to be even more mind-bending. You can make the “dispatch” function anonymous:</p>
+<pre><code>(define (cons x y)
+  (lambda (m)
+    (cond ((= m 0) x)
+          ((= m 1) y)
+          (else (error &quot;Argument not 0 or 1 -- CONS&quot; m)))))</code></pre>
+<p>It works the same.</p>
+<p>If you view functions as little boxes that basically just contain their return values this makes sense. A function is like a box that, when given its argument barfs up the result. In fact, don’t think of a function as <em>doing</em> something, think of it as <em>being</em> something. If it is first class then you should be able to treat it this way in all respects. You can pass around these little boxes that have some value “in” them and the only way to get it out is to “call” it (or force, or… whatever). But, and we’re starting to tread into heavy functional land here, what if you weren’t so hung up on the idea of getting the value “out” of the box?</p>
+<pre><code>(define (box-it-up x) (lambda () x))</code></pre>
+<p>This puts a value, x, in a box. You can do whatever you want with the box. You can store it, you can pass it around etc. And, of course, you can open it up by doing this:</p>
+<pre><code>((box-it-up 10)) ; 10</code></pre>
+<p>If that’s a bit hard to read, just remember that whatever is the first thing in a lisp list is called. Javascript would be:</p>
+<pre><code>box_it_up(10)(); // 10</code></pre>
+<p>But let’s say that we don’t really care to open the box (we labeled our boxes really well). We just want to make sure that, whenever it is opened, that we obey special handling instructions. Let’s write “double this” on the box.</p>
+<pre><code>(define (double-this box)
+  (lambda () (* (box) 2)))</code></pre>
+<p>Maybe I bent the rules a bit. I used a magic pen that when I wrote “double-this” on the box, it performed an old mover’s optimization trick. Instead of just having our original box I magically duplicated the old box with the twist that the new box now contains double whatever was in the old one ;) Got that? (Hey, metaphors are hard).</p>
+<p>Maybe you can see where I’m going here. I don’t want to have to make a new kind of “double-this” function every time I want to do something. How about I just give you the magic pen?</p>
+<pre><code>(define (magic-pen box func)
+  (lambda () (func (box))))</code></pre>
+<p>That means you can write “double-this” like so:</p>
+<pre><code>(define (double-this box)
+  (magic-pen box (lambda (x) (* 2 x))))</code></pre>
+<p>Here’s how this all looks now:</p>
+<pre><code>(define twenty-box (double-this (box-it-up 10)))
+
+(twenty-box) ; 20</code></pre>
+<p>cool! So this is how I’ve been thinking about Promises in javascript. We have a kind of box that unlike functions we really can’t open up for the simple reason that the value may not have happened yet. But it is no biggie because we can do whatever we like to the values inside inside the box!</p>
+<p>If you’ve got all that, then I’m happy because I’ve also kinda sorted tricked you into understanding monads. Did you notice how I was just able to handwave at the end and say, “yeah, but instead of functions the ‘box’ is some as-yet-unreceived network packet”? Monads are just the idea that you can compute all day long with these sorts of “unopened boxes”. Well not <em>just</em>, but the devil is in the details and that means that I’ll probably write another blog post about it.</p>
+<h2 id="the-dipert-problem"><a name="2012-09-03">the dipert problem</a></h2>
+<p><small>2012-09-03</small></p>
+<p>Recently, <a href="http://alan.dipert.org/">Alan Dipert</a> dropped a bomb on the twittersphere with his posing of <a href="https://twitter.com/alandipert/status/241575872937750529">this question</a> (warning there are spoilers in the replies):</p>
+<p>“pop quiz: solve <a href="http://www.4clojure.com/problem/107">http://www.4clojure.com/problem/107</a> point-free. answer must be a function value! #clojure”</p>
+<p>In case your office has banned 4clojure for being a huge distraction, I’ll post the problem here:</p>
+<pre><code>(= 256 ((__ 2) 16),
+       ((__ 8) 2))
+
+(= [1 8 27 64] (map (__ 3) [1 2 3 4]))
+
+(= [1 2 4 8 16] (map #((__ %) 2) [0 1 2 3 4]))</code></pre>
+<p>In problem 107, your challenge is to write a function that satisfies all of these (it could be dropped in place of the <code>__</code>s above). I will let you go take a crack at solving it. Because up next is some serious spoiler action.</p>
+<p>Got your solution? I came up with this:</p>
+<pre><code>(fn [x] (fn [y] (reduce * (repeat x y))))</code></pre>
+<p>or (what I was really doing) in Haskell:</p>
+<pre><code>f :: Int -&gt; Int -&gt; Int
+f x y = foldl1 (*) (replicate x y)</code></pre>
+<p>We are doing manual exponentiation: “make a list of <em>y</em>s that is <em>x</em> in length (e.g. <code>replicate 8 2 == [2, 2, 2, 2, 2, 2, 2, 2]</code>). Then you just run multiplication through the list:</p>
+<pre><code>foldl1 (*) [2,2,2,2,2,2,2,2] == 2 * 2 * 2 * ... 2 == 256</code></pre>
+<p>Now comes the “Dipert Problem.” He has told us that we have to rewrite the solution (or any solution) using so-called <em>point-free</em> style. I’m sure that there’s more to it, but essentially that means that <em>we are not allowed to mention any variables!</em> When I first heard about this style, it sounded impossible! The cool thing is that it <em>isn’t</em> and it leads to some massively simple code. Let’s try it out.</p>
+<p>I’m going to start with my solution above called <code>f</code> and then write some successive versions of it, each time, I’ll remove a variable and call it the “next” version: <code>f1</code>, <code>f2</code>, okay? Cool.</p>
+<pre><code>f, f1, f2 :: Int -&gt; Int -&gt; Int
+f x y = foldl1 (*) (replicate x y)</code></pre>
+<p>For the first transformation, we need to get rid of the <code>y</code> that’s hanging off the end of both sides of our equation. We’ll need to juggle the innards a bit because here is what the types look like so far:</p>
+<pre><code>foldl1 (*) :: [Int] -&gt; Int
+replicate x y :: Int -&gt; a -&gt; [a]</code></pre>
+<p><code>replicate</code> takes two arguments and then produces a list that the <code>foldl1 (*)</code> wants to consume. The trouble is, and what tripped me up a bunch, is that I can’t just do this:</p>
+<pre><code>foldl1 (*) . replicate</code></pre>
+<p>Wah, wah (sad trombone). GHCI tells me:</p>
+<pre><code>Expected type: Int -&gt; [c0]
+  Actual type: Int -&gt; a0 -&gt; [a0]</code></pre>
+<p>Okay, that makes sense, for the fold and replicate to “line up” for composition, replicate has to take one argument then produce a list. The crux is that composition (the “dot” or period in the code) only works for single-argument-functons:</p>
+<pre><code>(.) :: (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c</code></pre>
+<p>This is a little pipeline, but reversed because that’s how mathematics does it. It says “the right-side function takes an <em>a</em> and gives a <em>b</em>, and the left-side function expects a <em>b</em> and gives a <em>c</em>; now you can stitch them together and have a function that <em>skips</em> the <em>b</em> and takes you right from <em>a</em> to <em>c</em>.” But we have a function that looks like:</p>
+<pre><code>(a -&gt; b -&gt; c)</code></pre>
+<p>on the right-hand side; it won’t work. how do we convert a <code>(a -&gt; b -&gt; c)</code> to a <code>(a -&gt; (b -&gt; c))</code>? This way:</p>
+<pre><code>{-
+f x y =  foldl1 (*) ((replicate x) y)
+f x y = (foldl1 (*) . (replicate x)) y
+-}
+f1 x  =  foldl1 (*) . (replicate x)</code></pre>
+<p><em>Note:</em> the first two lines are commented in case you are cut-n-pasting along. The first line just puts parenthesis in where they really are in haskell. Each time you see a function of two arguments, it <em>is really</em> a function which takes one argument and returns a function that expects the second argument! This weird but remarkable fact of haskell is called <a href="http://www.haskell.org/haskellwiki/Currying">currying</a>.</p>
+<p>Now, on to the second line, we see that we have the right types! (I am cheating a bit on types, if you like, you can define <code>rep</code> which <em>just</em> uses <code>Int</code>s)</p>
+<pre><code>replicate x :: Int -&gt; [Int]  -- cheating: where &#39;x&#39; is a specific int
+foldl1 (*)  :: [Int] -&gt; Int
+
+foldl1 (*) . replicate x :: Int -&gt; Int</code></pre>
+<p>And that brings us to <code>f1</code>! We used grouping and composition to move the <code>y</code> outside the computation and then we dropped it from both sides.</p>
+<p>Next we’ll tackle the x:</p>
+<pre><code>{-
+f x =  (foldl1 (*) .) (replicate x)
+f x = ((foldl1 (*) .) . replicate) x
+-}
+f2 =   (foldl1 (*) .) . replicate</code></pre>
+<p>It may look different, but the same thing is going on. We can group the composition with the fold without changing anything. This is just like doing:</p>
+<pre><code>3 + 4 == (3 +) 4</code></pre>
+<p>Next we do that same trick again where we can now compose the inner functions because the types line up (again, I’m simplifying types a bit):</p>
+<pre><code>((foldl1 (*) .) .) :: (a -&gt; b -&gt; [c]) -&gt; a -&gt; b -&gt; c</code></pre>
+<p>it looks a bit hairy, but in our case, it is just what we want! If I fill in the actual types we’ll be using, it becomes clearer:</p>
+<pre><code>((foldl1 (*) .) .) :: (Int -&gt; Int -&gt; [Int]) -&gt; Int -&gt; Int -&gt; Int</code></pre>
+<p>Booyah! This contraption takes a <em>function</em> of two <code>Ints</code> that produces a list of ints, <code>[Int]</code>. Well, that’s just what <code>replicate</code> is! So if we then feed in replicate:</p>
+<pre><code>(foldl1 (*) .) . replicate :: Int -&gt; Int -&gt; Int</code></pre>
+<p>And that’s it, we have a point-free function that takes two <code>Int</code>s and returns an <code>Int</code>. And so that’s our last, and final function:</p>
+<pre><code>f2 = (foldl1 (*) .) . replicate</code></pre>
+<p>In general, and I don’t know a term for this, but the operation of successive function composition lets us compose higher and higher arity functions together. Here’s a dumb example using my little point-free <code>succ</code> function:</p>
+<pre><code>g :: Int -&gt; Int
+g = (+1)
+(g .)       :: (a -&gt; Int) -&gt; a -&gt; Int
+(g .) .)    :: (a -&gt; b -&gt; Int) -&gt; a -&gt; b -&gt; Int
+(g .) .) .) :: (a -&gt; b -&gt; c -&gt; Int) -&gt; a -&gt; b -&gt; c -&gt; Int</code></pre>
+<p>Clear pattern. I kinda think of this as saying something like “please give me a function which <em>eventually</em> promises to give me what I want.” The <em>eventually</em> part is essentially “after you’ve collected all the stuff you need.” It would be trivially satisfied by some function that ignores its args and returns a constant:</p>
+<pre><code>(((g .) .) .) (\x y z -&gt; 1) 4 5 6 == 2</code></pre>
+<p>Remembering that <code>g</code> just increments, the x y z are <em>totally ignored</em>. The function supplied to the multiply-composed <code>g</code> is like some kind of integer “pre-processor”; the <em>x</em>, <em>y</em> and <em>z</em> can be whatever you need to do to figure out how to give g an integer. Or at least that’s how I’m thinking of it.</p>
+<p>I had a lot of fun trying to figure this out!</p>
+<h2 id="my-transparent-web-talk"><a name="2012-08-22">my “transparent web” talk</a></h2>
+<p><small>2012-08-22</small></p>
+<iframe src="http://www.slideshare.net/slideshow/embed_code/14023703" width="427" height="356" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC;border-width:1px 1px 0;margin-bottom:5px" allowfullscreen> </iframe> <div style="margin-bottom:5px"> 
+<strong> <a href="http://www.slideshare.net/twopoint718/the-transparent-web-14023703" title="The Transparent Web: Bridging the Chasm in Web Development" target="_blank">The Transparent Web: Bridging the Chasm in Web Development</a> </strong> from <strong><a href="http://www.slideshare.net/twopoint718" target="_blank">twopoint718</a></strong>
+</div>
+
+<p>Without much ado at all, here’s my talk. I’m covering the <em>real</em> basics of using both <a href="http://www.impredicative.com/ur/">Ur/Web</a> and <a href="http://opalang.org/">Opa</a>. I create a basic “Hello world” page in each and then I go on to write a little “comments” system.</p>
+<h2 id="my-gpl-talk"><a name="2012-05-05">my gpl talk</a></h2>
+<p><small>2012-05-05</small></p>
+<div style="width:425px" id="__ss_12802829"> 
+<strong style="display:block;margin:12px 0 4px"><a href="http://www.slideshare.net/twopoint718/once-upon-a-time-at-the-mit-ai-lab" title="Once Upon A Time At the MIT AI Lab" target="_blank">Once Upon A Time At the MIT AI Lab</a></strong> <iframe src="http://www.slideshare.net/slideshow/embed_code/12802829" width="425" height="355" frameborder="0" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+<div style="padding:5px 0 12px"> 
+View more <a href="http://www.slideshare.net/" target="_blank">presentations</a> from <a href="http://www.slideshare.net/twopoint718" target="_blank">twopoint718</a>
+</div></div>
+
+<p><em>note to the reader, my speaker notes are reproduced below and all run together. Also, the editing isn’t top-notch.</em></p>
+<p><strong>notes</strong></p>
+<p>First a warning, if you thought I was going to talk about software licenses, I’m not. Not really. I’m going to talk mostly about people. Ideas are one thing, they are the compiled results of processes that people go through. I want to decompile some ideas. I want to talk about that.</p>
+<p>To that end, let me tell you a story. Let’s go back to 1980, Richard Stallman is employed as a staff hacker at the MIT AI lab. This is the stuff of legend.</p>
+<p>The lab had recently been given a new prototype printer from XEROX PARC. This was ten times faster than the previous printer, finishing a 20 minute job in 2 minutes and with more precise shapes to boot. This was the same sort of tech that a decade hence would touch off the desktop publishing revolution. But back at the AI lab, the printer was becoming the source of more headache than anything else. Stallman and others would send jobs to the printer only to show up later to find that the job had jammed four pages in. This was a minor annoyance, but it was multiplied by everyone at the lab. Stallman thought, “why should I have to babysit this machine when I can code?”</p>
+<p>Stallman knew a way to attack this sort of problem. On a previous printer he had modified the source to insert some monitoring code in the printer driver. Periodically, Stallman’s code would check to see that the printer was proceeding in its assigned job, if it had stalled, the program would alert whoever’s print job was affected. You’d get a message like: “The printer is jammed. Please fix it.” It wasn’t perfect, but it informed those most interested in the problem.</p>
+<p>The solution this time around would be similar. Stallman could grab his old code, tweak it for the new printer and voila: jam notifications. So Stallman rolled up his sleeves, grabbed a coffee, and opened up the Xerox source code.</p>
+<p>If you see where I’m going here, you’ll probably see what’s coming next. There was no source code. Stallman even spoke with the programmer that had worked on it and that programmer wasn’t allowed reveal the code to Stallman.</p>
+<p>This is the moment where something happens. This is where an insight strikes, the apple falls on your head, the disparate pieces line up and you need to jump out of the tub and tell the world. Stallman decided, at that moment, that some fundamental wrong had been done: the wrong of not being allowed to help your neighbor by telling him how code works., This brings me to the main point of this talk. This is the thing that, even if everything else you hear is mangled or forgotten, I want to come through unchanged: RMS believes that software has moral implications, the choice of what kind of SOFTWARE you want is a choice about what kind of WORLD you want.</p>
+<p>Note all the things that I didn’t say. It isn’t about what is technically superior. It isn’t about what is good for being able to sell. It isn’t about what the legal department says. It has no bearing on what various companies will tell you to be worried about. It isn’t about being good for playing games, or having flash support. It is nothing more and nothing less than a philosophical stance. You can agree with it, or disagree with it in exactly the same way as you would argue about Plato’s Forms.</p>
+<p>I feel like this is the key misunderstanding in discussions surrounding the GPL and Free software. I’m taking a philosophical, an ethical, and maybe a moral stance. I haven’t brought anything else into it. Often, when I see discussions about software licenses, I feel like people are talking past one another from the very first sentence.</p>
+<p>It is profoundly nonsensical to compare something like “justice” to something like a wrench., Philosophers begin by defining words, because if they don’t, we’ll get so mired in the muck of argument that no points are made, no progress is made.</p>
+<p>The word “free” is a good place to start. Free can be taken to mean “no cost” but it can also be taken to mean “freedom”. This is sort of a fine point to make, but I think it could lead to lots of confusion.</p>
+<p>Free software has to do with the “freedom” part. There are lots of really good objections at this point. The one that I have anticipated is “freedom for whom?” And that’s the core of the so-called permissive divide in the broader category of “open” software. The permissive people would respond to the “freedom for whom” question with something like “certainly not for me, you say I <em>must</em> share changes, that’s pretty restrictive.” And the answer to “freedom for whom?” that I want to present here is…</p>
+<p>Well, that’s the rest of my talk., The GPL is a really a more general case of the Emacs license.</p>
+<p>Now Emacs has a pretty storied history, wikipedia dates it back to the mid seventies, well before GNU or Emacs-as-GNU-project. But by the time of the release of Emacs 15, there was a sort of proto-GPL license attached. It served to give “users the right to make and distribute copies” and “the right to make modified versions, but not the right to claim sole ownership of those modified versions”. It was moving in a similar direction, but it was not as legalistically formal as the eventual GNU project would need it to be.</p>
+<p>Stallman’s intellectual property attorney at the time viewed the GNU Emacs License pretty much as a simple contract, although one that stipulated a rather odd price. Rather than money, the license cost access to any changes. Users would have to share modified versions of the software. The attorney remarked: “I think asking other people to accept the price was, if not unique, highly unusual at that time”</p>
+<p>In 1989 a 1.0 version of the GPL had emerged. The preamble read:</p>
+<blockquote>
+<p>The General Public License is designed to make sure that you have the freedom to give away or sell copies of free software, that you receive source code or can get it if you want it, that you can change the software or use pieces of it in new free programs; and that you know you can do these things.</p>
+<p>To protect your rights, we need to make restrictions that forbid anyone to deny you these rights or to ask you to surrender the rights. These restrictions translate to certain responsibilities for you if you distribute copies of the software, or if you modify it.</p>
+</blockquote>
+<p>one notable change was that users were no longer required to share changes. You could make private in-house tweaks to the software without being forced to share these changes back to the community. , License agreements are not usually characterized by what they <em>give</em> you, rather, as we scan ever longer End User License Agreements, or plow through revision 271 of Facebook’s new much-better-we-assure-you privacy policy, we are looking for things that they are taking from us.</p>
+<p>The GPL, in essence, tries to codify a very idealistic hacker ethic. It is for tinkering, changing, breaking, reassembling, and passing it on to your friend. It is software as mix-tape.</p>
+<p>The main things that the GPL gives you are broken down into four parts, aka the “four freedoms”, Zero: You’re allowed to do what you want with the software. An author can’t proscribe the software’s use for something that they don’t approve of. This is pretty profound, I think.</p>
+<p>one: if you are going to be able to do this, you’ll need the source code. You’ll also need whatever is required to actually end up with a working program. This can be a point of contention. A corner case of this is in embedded systems such as set-top boxes where the code may be GPL, busybox is a common example, but you can’t actually change the code due to things like code signing., two: I think it is interesting that two emphasizes the goal of the redistribution. It isn’t just for fun or for copying’s sake, it is because we view software as something that can help people.</p>
+<p>freedom three, the final freedom. You’ll also need access to the source code to realize this one. You are allowed to make public changes to the code. The difference with freedom one is that you’re allowed to do this out in the open, rather than just in private and for your own reasons. You can fork. You can contribute back.</p>
+<p>lurking in freedom three is also the core of my argument, which I promise I’m getting to really soon., I’m going to try and dispel a common myth about the GPL, one I’ve heard a lot. The general gist is that “the GPL is to copyright as anarchy is to government.” Something that is opposed to the very notion of it. This is where people get the idea that any business built on such shifting sand of self-destruction must be flawed in some way.</p>
+<p>Opposition to copyright is an interesting subject, there’s lots of good debate. But it doesn’t really have anything to do with the GPL. The GPL has staked its efficacy IN copyright.</p>
+<p>Far from being some sort of anti-copyright construct, the GPL’s EXISTENCE depends on copyright, if you didn’t have copyright, you couldn’t have the GPL (or lots of other stuff). You wouldn’t get any say in what people do with your stuff… but that’s another discussion entirely!</p>
+<p>So for the rest of the talk, consider copyright to be a constant underpinning, a foundational necessity for everything else we’re talking about. It’s just that we’re going to use it for something that it wasn’t intended: we’re hacking it., BAM: flip it</p>
+<p>copyleft: pay it forward.</p>
+<p>As Stallman said: “see [the GPL] as a form of intellectual jujitsu, using the legal system that software hoarders have set up against them”, he actually lifted this from a similar sticker from a sci-fi convention which read: “Copyleft (L), All Rights Reversed.”, And this brings me around to what my thinking on the GPL is. I guess I’m kinda surprised by all the emphasis on virulence these days. The metaphor is broken. Metaphors are broken–but that’s another talk.</p>
+<p>Casting aside any metaphors, the GPL is an <em>inductive license</em>. This is a term that I made up but I think it describes the nature of the GPL much better than saying that it is viral.</p>
+<p>An initial case is established. You have the four freedoms: the freedom to run, freedom to change, freedom to redistribute, and the freedom to share those changes.</p>
+<p>But for it to really be Free software, the person <em>receiving</em> the software must have these freedoms. So it is not good enough for us to leave it here. We only have the base case for a software license. We have to prove the general case, not me or you, but person N+1., So the person who’s freedom we’re talking about is person N+1, the inductive person.</p>
+<p>This idea is the essential difference between being permissive software and being free software. Free software describes the case of that person N+1, inductively. It raises the “freedom for whom?” question and answers it with “the inductive person”.</p>
+<p>So I’ll leave where, approximately, I started with a definition:</p>
+<p>The word “induction” is the practice of deriving general laws from specific cases, it arises from a root word meaning “leading to” or “hypothetical”. Free software asks us to consider this hypothetical person on the assumption that it could someday be anyone, indeed everyone.</p>
+<h2 id="secret-santa"><a name="2011-12-27">secret santa</a></h2>
+<p><small>2011-12-27</small></p>
+<p>While I was sitting around and eating a ton of Christmas food, I got to thinking about the <a href="http://en.wikipedia.org/wiki/Secret_Santa">Secret Santa</a> problem. In its most basic form, this is the same as something called a <a href="http://mathworld.wolfram.com/Derangement.html">derangement</a>. I mention it just because I think the name is cool, the concept is super simple, a <em>derangement</em> is a permutation of the elements of a list such that no element stays in the same place:</p>
+<pre><code>[1, 2, 3] would have a derangement:
+[2, 3, 1]</code></pre>
+<p>notice that each element has moved. So this pertains to secret santas because if you are just not allowed to chose yourself then a derangement (like <a href="http://hackage.haskell.org/package/derangement">this</a>) is all that you’d need, it would be a valid secret santa!</p>
+<pre><code>&gt; zip [1, 2, 3] (derangement [1, 2, 3])
+[(1,2),(2,3),(3,1)]</code></pre>
+<p>cool! person 1 gives to person 2, person 2 gives to person 3, and person 3 gives to person 1.</p>
+<p>As my family could tell you, I thought that I could do better (in keeping with my motto “if it ain’t broke, fix it until it is”). Wouldn’t it be cool if in additon to just forbidding the case where you pick your own name (reflexive), you also can provide two more lists. One is a list of pairings which are <em>disallowed</em> and the second is a list of pairings which are to be <em>discouraged</em> (less likely).</p>
+<p>I’ve implemented almost what I just described. In the code below, I don’t actually make a selection from some distribution where discouraged selections are less likely. Instead, I’ve added a <code>bestSantas</code> function that allows you to limit yourself to selections that are under a certain amount of <em>badness</em> (a selection has 1 point of badness for each discouraged pairing that it includes). I hadn’t decided how I wanted to select from among differing levels of badness yet. But anyway, enjoy!</p>
+<script src="https://gist.github.com/1525233.js"></script>
+
+
+<h2 id="sopa-hearings"><a name="2011-12-15">sopa hearings</a></h2>
+<p><small>2011-12-15</small></p>
+<p>These SOPA hearings are beyond awful. The fact that the hearings, at least as I have found them at 6pm CST, are about who has standing to sue in the US, nothing more. This feels like a group of people standing around trying to decide to roast hotdogs or marshmallows as the <a href="http://en.wikipedia.org/wiki/Library_of_Alexandria">Library of Alexandria</a> burns.</p>
+<p><a href="https://www.eff.org/deeplinks/2011/12/internet-inventors-warn-against-sopa-and-pipa">This letter</a>, which carries the signatures of many the designers and builders of the Internet (TCP/IP, BIND, DNS, HTTP, MIME, etc.), clearly lays out the damage that this bill would cause.</p>
+<p>What I find infuriating about the discussions that are happening right now regarding SOPA, is that the committee members are so glaringly ignorant of the Internet. There is no discussion of how it would work with DNS, what burden that would put on hosting companies, schools, organizations, etc. In short, they don’t appear to know how the Internet works.</p>
+<p>I cannot help but worry that there are influencers promoting this bill who have a very narrow interest in the Internet. They see it as an economic threat to an old business model (movies, music) and it must be turned into a safe and effective mechanism to secure an income stream in the future.</p>
+<h2 id="strangeloop-2011-notes"><a name="2011-09-24">strangeloop 2011 notes</a></h2>
+<p><small>2011-09-24</small></p>
+<p>I got back from <a href="https://thestrangeloop.com/">Strangeloop 2011</a> just this week and wanted to cover some of the interesting points from this <em>really</em> fascinating conference (it is on my <em>must go</em> list from now on)!</p>
+<p>It was incredibly difficult to get to all the talks that I wanted to see because the conference was “seven talks wide” at most points. A common theme emerged where, as I finished up a talk in one room, I would see the stream of tweets start rolling in about some incredible talk that I had just missed; I can’t wait for those videos.</p>
+<p>Here’s my recap of the stuff that I went to:</p>
+<p><strong>Sunday (workshop day)</strong></p>
+<ul>
+<li><em>Haskell: Functional Programming, Solid Code, Big Data</em> with Bryan O’Sullivan - this was a really nice intro to Haskell for someone that hadn’t ever seen it before. I’ve worked through about half of the “Real World Haskell” book so a lot of this was not new. But it was great to see one of the authors explain some points himself. There was also some interesting comments from <a href="http://en.wikipedia.org/wiki/Gerald_Jay_Sussman">Gerald Sussman</a> about how haskell is the “most advanced of the obsolete languages” (more on that later).</li>
+</ul>
+<p><strong>Monday (first day of conference)</strong></p>
+<ul>
+<li><p><em>Category Theory, Monads, and Duality in (Big) Data</em> with Erik Meijer - This was a really cool opening keynote where Erik Meijer launched the new term <em>CoSQL</em> instead of <em>NoSQL</em> by showing how the two concepts are <a href="http://en.wikipedia.org/wiki/Dual_(mathematics)">duals</a> of one another (in the mathematical, category theory sense). This proved to be something of an overarching theme of the conference, things being different but mirrored versions of the same thing. see: <a href="http://queue.acm.org/detail.cfm?id=1961297">A co-Relational Model of Data for Large Shared Data Banks</a>.</p></li>
+<li><p><em>[I skipped this timeslot because I was on the <a href="http://blog.hallwaytrack.org/articles/2006/04/27/the-hallway-track-blog">hallway track</a> listening to Erik Meijer talk about static typing with some scala folks; very interesting!]</em></p></li>
+<li><p><em>An Introduction to Doctor Who (and Neo4j)</em> with Ian Robinson - I have to admit, I got sucked in because I’m a huge Doctor Who fan, but I <em>had</em> heard of graph databases before and Neo4j looked to be a really interesting one. In particular, I wanted to see if this could be used from Clojure (yes: <a href="http://github.com/wagjo/borneo">borneo</a> and <a href="https://github.com/mattrepl/clojure-neo4j">clojure-neo4j</a>). The talk concerend building a very complicated network of the relationships between several Doctor Who props (Daleks!) over time. It was pretty easy to see how these mapped nicely to nodes with arcs between them.</p></li>
+<li><p><em>Skynet: A Scalable, Distributed Service Mesh in Go</em> with Brian Ketelsen - this was a cool talk about a lightweight framework written in <a href="http://golang.org/">go</a> for writing distributed applications that are highly resilient. It uses <a href="https://github.com/ha/doozerd">Doozer</a> for data storage (though it didn’t in this talk).</p></li>
+<li><p><em>Parser Combinators: How to Parse (nearly) Anything</em> with Nate Young - This talk gave examples of writing parser combinators (where a <em>parser</em> here means a function that can consume a little input, and then returns another function that consumes input after it). The idea is to chain these parsers together with <em>combinators</em> (higher-order functions which take parsers and operate on them, like “oneOrMore” etc.). This talk reminded me of Bryan O’Sullivan’s funny phrase about how haskell’s “&gt;&gt;=” operator (read “bind”) is written in “moon language”.</p></li>
+<li><p><em>Getting Truth Out of the DOM</em> with Yehuda Katz - This was a talk about the <a href="http://www.sproutcore.com/">SproutCore</a> framework. Katz had a lot of insight about how to keep the browser interaction abstract and event-based rather than mucking about (and then being mired) in the DOM.</p></li>
+<li><p><em>We Don’t Really Know How to Compute!</em> with Gerald Sussman - This was a mind-blowing keynote. In fact, I had to develop a new unit of measure, the <em>Eureka</em>, which denotes having one’s mind blown once per minute. I think that in the 50-some minute talk that Sussman gave, I may have had more than about 50 mind-blowing thoughts. At one point Sussman asked how much time he had left and someone from the audience yelled out “who cares?”, which was pretty much the feeling in the room.</p>
+<p>Sussman started out the talk with a picture of a <a href="http://en.wikipedia.org/wiki/Illusory_contours">Kanizsa Triangle</a> and mentioned that the brain can infer that there is a hidden triangle in just about 100 ms which is a few tens of “cycles” for the brain. With a computer, we don’t know how to even begin to solve this recognition problem in that few of cycles; <em>we don’t really know how to compute</em>. Sussman’s idea (which I can’t do justice to here), was that computing as we know it has to and will change in the near future. Computing will become massively distributed (“ambient”, but this term is from a later talk) and in disparate nodes that must collaborate to arrive at answers.</p>
+<p>His <a href="http://groups.csail.mit.edu/mac/projects/amorphous/Robust/">example</a>, a <em>Propagator</em> was a program that can integrate more annd more data while keeping track of the provenance of that data. Or another way an “independent stateless machine connecting stateful cells”. Amazing!</p></li>
+</ul>
+<p><strong>Tuesday (second day of conference)</strong></p>
+<ul>
+<li><p><em>Embedding Ruby and RubyGems Over RedBridge</em> with Yoko Harada - This didn’t make that much sense to me until coworker (@devn) started doing some cool stuff with using ruby gems from clojure.</p></li>
+<li><p><em>Event Driven Programming in Clojure</em> with Zach Tellman - This was a really cool talk. It looked to me to be an implementation of go-style concurrency (channels) in clojure. There was also a macro that would analyze data dependencies and do the correct async calls. The projects are called <a href="http://github.com/ztellman/lamina">Lamina</a> and <a href="http://github.com/ztellman/aleph">Aleph</a> and they’re one of those things that I want to find a project on which to use them.</p></li>
+<li><p><em>Teaching Code Literacy</em> with Sarah Allen - This was a talk about how to give kids the opportunity to learn about programming at an early age (Allen says that programming is one of those things that you don’t know if you’ll like it until you’ve tried it.) She also had found that the ages that programming should be introduced is 5th-6th grade; earlier than I thought!</p></li>
+<li><p><em>Post-PC Computing is not a Vision</em> with Allen Wirfs-Brock - This talk started with a breakdown of the eras of computing. First was a “coporate” era, then a “personal” era, and now we are entering the “ambient” era. Each era is defined by what ends computing resources are put toward. In the coporate era computing was used to solve problems that businesses had, then computing became more available generally, and finally it is becoming ubiquitous. This talk also covered the history of the browser and how it is, and will be, the platform for the forseeable future.</p></li>
+<li><p><em>Simple Made Easy</em> with Rich Hickey - Rich’s talk was an argument for disentangling computing. It started with separating the notions of “simple”, “complex”, and “easy”. Easy is a subjective thing, things that I find easy you may not. Simple is objective, it derives from the notion of “a single fold”. Complex is just the opposite, it is “woven or braided”. We must avoid adding complexity to our software, or as Rich put it, we must not “complect” it (“to interweave or entwine”). Humans have a finite (and very limited) ability to handle many factors simultaneously, and so to have any hope of working with difficult problems, we must be rigorous in working toward simplicity.</p></li>
+</ul>
+<p>Rich had a few words for TDD in his talk, and I think these were widely misinterpreted. His point was simply that tests have a cost and a thoughtless devotion to them will risk underestimating that cost. I think a lot of people took that to mean “you shouldn’t test” or that “tests are worthless”, but I think he was just pointing out that they’re not free. He introduced the term “guardrail programming” for a style that just bounces between the guardrails rather than proceeds to a destination by steering.</p>
+<p>This talk drew a standing ovation from the crowd, including, I hear, Gerald Sussman. I’ll be looking for it on video when it comes out.</p>
+<p>Strangeloop 2011+N is definitely on my must-attend list. The people that I met (which could be another couple of blog posts) were worth the admission all by themselves. The talks were fascinating and gave me a ton to read up on. The conference felt like it was well-run and organized. St. Louis was a cool city to hang out in (I wish we had the same open-container law in Madison!). I can’t wait for next year.</p>
+<h2 id="madison-ruby-conference"><a name="2011-08-16">Madison Ruby Conference</a></h2>
+<p><small>2011-08-16</small></p>
+<p>I’m going to be attending the <a href="http://madisonruby.org">Madison Ruby Conference</a> this Friday and Saturday. I must confess that I’m not a Ruby-ista (does this reveal my <em>pythonista</em> heritage?) by training but I’m really excited to go and see who attends, chat with smart tech-folk, and generally have a good nerd-time yakking about code. Plus, it couldn’t hurt to see a little ruby code and see what all the fuss is about. I’m not going to confine myself to: C, Java, Python, Lisp, Haskell, and shell. Conference Ahoy.</p>
+<h2 id="social-networking"><a name="2011-07-03">Social Networking</a></h2>
+<p><small>2011-07-03</small></p>
+<p><em>Google+ is another Facebook</em>. It may be nice but we should all remember that it is basically the same thing. That may be a positive or a negative for you, but the same conversation that we’ve been having about Facebook applies to Google+. If we want to network with people, perhaps it is worthwhile to consider existing tools. Blogs for general sharing (blogs that live on your own server!), email for 1-to-1 correspondence, IRC for chat and so on. You don’t need a third party to mediate your relationships.</p>
+<p>Enjoy the <a href="http://xkcd.com/918/">XKCD on the topic</a>.</p>
+<h2 id="code-crawl"><a name="2011-06-21">Code Crawl</a></h2>
+<p><small>2011-06-21</small></p>
+<p>A <em>code crawl</em> is an event that’s a mix of a <a href="http://en.wikipedia.org/wiki/Hackathon">hackathon</a> and a <a href="http://en.wikipedia.org/wiki/Pub_crawl">pub crawl</a>. Here’s how it works:</p>
+<p>Interested parties grab their laptops or, I suppose, lug their desktops, out to the bars. Everybody orders a drink or two and hacks on code for around an hour. The group gathers around a big table if the bar has it, or keeps in quasi-remote contact from the bar’s far-flung corners via IRC or the like. If the atmosphere allows it, it’s fun for participants to just yell “try it now” or “pull from my repo” across the room. Maybe they’ll get puzzled stares from other patrons. They should just explain that it’s a code crawl and everyone is programming! When they reach a good <em>break point</em> (ha), or just after an hour or two, everybody closes out their tabs (or the single mondo-tab!) and heads off to the next stop on the crawl.</p>
+<p>Groups can do something fun when they think they’ve collectively hit the <a href="http://xkcd.com/323/">Ballmer Peak</a>. Of course, it’s probably then a good time to wrap up the crawl!</p>
+<h2 id="first-post"><a name="2011-05-27">First Post</a></h2>
+<p><small>2011-05-27</small></p>
+<p>First post. That’s what’s the best about reformatting a blog. It always seems to generate at least one extra post. It’s weird how blogging software does that.</p>
+<h2 id="hackerspace-show-on-wisconsin-public-radio"><a name="2011-05-01">Hackerspace Show on Wisconsin Public Radio</a></h2>
+<p><small>2011-05-01</small></p>
+<p><a href="http://www.wpr.org/webcasting/audioarchives_display.cfm?Code=mlr&amp;StartRow=1&amp;keyword=makerspace&amp;highlight=on&amp;x=0&amp;y=0">Larry Meiller did a show about</a> (maker|hacker)spaces in Wisconsin. Sector67 is mentioned.</p>
+<h2 id="learning-to-type-on-the-twiddler-keyboard"><a name="2011-03-20">Learning to type on the Twiddler keyboard</a></h2>
+<p><small>2011-03-20</small></p>
+<p>I recently got a twiddler chorded keyboard (I love it). My two main goals with it are to be able to use it while doing things like giving talks, because it is like having one of those presentation clickers yet at the same time being able to competently type with it. And the second goal is to use it on my smartphone as a better alternative to the on-screen keyboard. I just want to make a little aside on the second goal. It’s not totally clear to me how to use an external USB keyboard with Android (though I have some leads) but things look generally promising.</p>
+<p>Either use, of course, assumes that I can type on the crazy thing. I’m one of those people that find it fun to try and re-wire my brain to do new things and I figure that if I switched to dvorak (and have been using it for about 10 years) that I can tackle this thing! I decided to do some drills with the Twiddler so that I get to the point where I can use it for day-to-day stuff, from then on it’ll bootstrap itself through frequent use. That, by the way, was roughly my technique for learning dvorak back in the day</p>
+<ol style="list-style-type: decimal">
+<li>Print out the layout and tape it up at eye-level, this breaks you of the habit of looking at the keys (they won’t help you if you remap the keyboard in software)</li>
+<li>Do simple drills of the home row (this is great on Dvorak because you can form TONS of words)</li>
+<li>Expand the drills to less frequently used letters and characters</li>
+<li>Now that you can type all words, even if you are slow, get on IM or IRC in a low-traffic channel that you would like to participate in, and just converse. This will provide both motivation and practice without the feeling of banging your head against the wall.</li>
+<li>Do this daily or almost-daily for about 4-8 weeks (that’s about how long it took me to match and then exceed my QWERTY speed)</li>
+</ol>
+<p>To deal with steps 2 and 3 on the twiddler, I wrote this short python script that pulls words out out /usr/share/dict/words that can be typed without any chord (open), using the first chord key (1st or “L”), and finally the second chord key (2nd or “M”). I don’t have the third chord key on here because using just the first and second is sufficient for all letters. Here’s the script:</p>
+<pre><code>import random
+
+def all_from(target_list, input_list):
+    for c in input_list:
+        if not c in target_list:
+            return False
+    return True
+
+def first_set(input_word):
+    return all_from(&quot;abcdefghABCDEFGH&quot;, input_word)
+
+def second_set(input_word):
+    return all_from(&quot;ijklmnopqIJKLMNOPQ&quot;, input_word)
+
+def third_set(input_word):
+    return all_from(&quot;rstuvwxyzRSTUVWXYZ&quot;, input_word)
+
+def fourth_set(input_word):
+    return all_from(&quot;.,;&#39;\&quot;?!-&quot;, input_word)
+
+def search_words(words, key_set=first_set):
+    out = []
+    for word in words:
+        if key_set(word) and len(word) &gt; 1:
+            out.append(word)
+    return out
+
+if __name__ == &quot;__main__&quot;:
+    get_words = 10
+    fname = &quot;/usr/share/dict/words&quot;
+    wordlist = open(fname, &quot;r&quot;).read().split(&quot;\n&quot;)
+
+    first = search_words(wordlist, first_set)
+    second = search_words(wordlist, second_set)
+    third = search_words(wordlist, third_set)
+    #fourth = search_words(wordlist, fourth_set) # need wordlist w/ punct.
+
+    print &quot;open: &quot;, &quot; &quot;.join(random.sample(first, get_words))
+    print &quot;1st:  &quot;, &quot; &quot;.join(random.sample(second, get_words))
+    print &quot;2nd:  &quot;, &quot; &quot;.join(random.sample(third, get_words))
+    #print &quot;3rd:  &quot;, &quot; &quot;.join(random.sample(fourth, get_words))</code></pre>
+<h2 id="dont-zip-bundle1"><a name="2011-03-02">Don’t zip, bundle(1)</a></h2>
+<p><small>2011-03-02</small></p>
+<p>I’ve been playing around with Plan 9 from Bell Labs a bunch lately. It takes the Unix idea that everything should have a file-like interface and runs with that to its logical (and surprisingly useful) extreme. It seems like a system that hangs together really well and has the feeling that it was actually designed, rather than grown. But that’s enough about that. What I wanted to mention was a script, bundle(1), that I found to be really useful. So, use the source, Luke!, and then I’ll say something about it:</p>
+<pre><code>#!/bin/sh
+echo &#39;# To unbundle, run this file&#39;
+for i
+do
+    echo &quot;echo $i&quot;
+    echo &quot;sed &#39;s/.//&#39; &gt;$i &lt;&lt;&#39;//GO.SYSIN DD $i&#39;&quot;
+    sed &quot;s/^/-/&quot; $i
+    echo &quot;//GO.SYSIN DD $i&quot;
+done</code></pre>
+<p>Cool huh? It’s kinda meta but here’s what it does: when you run it like bundle file1 file2 &gt; regen.sh it outputs a script that when run will recreate file1 and file2. It does this with a few applications of sed. Using file1 and file2 as examples, say I have file1’s contents:</p>
+<pre><code>hello</code></pre>
+<p>and file2 is:</p>
+<pre><code>world!</code></pre>
+<p>after running bundle with these two files the contents of regen.sh will look like this:</p>
+<pre><code># To unbundle, run this file
+echo file1
+sed &#39;s/.//&#39; &gt; file1 &lt;&lt;&#39;//GO.SYSIN DD file1&#39;
+-hello
+//GO.SYSIN DD file1
+echo file2
+sed &#39;s/.//&#39; &gt; file2 &lt;&lt;&#39;//GO.SYSIN DD file2&#39;
+-world!
+//GO.SYSIN DD file2</code></pre>
+<p>so, if you run this file, it prints “file1” and “file2” to the terminal, but then writes “hello” and “world” to file1 and file2, respectively (after having stripped the “-” off of each line using sed). So this is a neat little way to package up a bunch of text-ish files into a single “self-expanding” package.</p>
+<h2 id="unfill-paragraph-only-emacs-nerds-need-apply"><a name="2010-12-05">unfill-paragraph (only Emacs nerds need apply)</a></h2>
+<p><small>2010-12-05</small></p>
+<p>I usually keep plain text at a nice and tidy 72 columns (give or take, but certainly under 80!). But there are times when it is necessary to have code that will be folded (word-wrapped) by the end user. Think of those text boxes on websites where the result is going to be displayed on some website in a totally unformatted way. In this case you want the text to be one long line per paragraph with a blank line separating each. That way, the text is as wide as the browser window or otherwise follows user preferences (see <a href="http://www.mozilla.org/unix/customizing.html#usercss">http://www.mozilla.org/unix/customizing.html#usercss</a> for how to do this in Firefox). Since I’m always hitting M-q in Emacs, my code’s always formatted at 72ish columns. The following bit of Emacs Lisp lets you unfill-lines, that is it strips out newline characters within a paragraph.</p>
+<pre><code>;; Stefan Monnier &lt;foo at acm.org&gt;. It is the opposite of fill-paragraph
+;; Takes a multi-line paragraph and makes it into a single line of text.
+
+(defun unfill-paragraph ()
+    (interactive)
+    (let ((fill-column (point-max)))
+    (fill-paragraph nil)))
+
+(global-set-key (kbd &quot;C-c M-q&quot;) &#39;unfill-paragraph)</code></pre>
+<h2 id="maine"><a name="2010-11-16">Maine</a></h2>
+<p><small>2010-11-16</small></p>
+<div class="gallery">
+<a href="img/DSC-6981-SMALL.jpg"><img
+  alt="Maine Seashore"
+  src="img/DSC-6981-SMALL-1024x680.jpg"></a>
+</div>
+
+
+<h2 id="remembrance-of-blogs-past"><a name="2010-11-13">Remembrance of Blogs Past</a></h2>
+<p><small>2010-11-13</small></p>
+<div class="img">
+<img src="img/hypnotoad_clockscope.jpg" alt="hypnotoad">
+</div> 
+<p>Yikes, it always seems to come to this. I find myself with a blank directory or database (it depends on the blog) that needs to be filled up with stuff that I write. And as is the requirement, I go and start filling it up with data.</p>
+<p>I can pardon you for missing the blog that previously inhabited this domain name. Its short run was punctuated by frequent DNS issues, the blog equivalent of being deprived of oxygen. It was also overly fussy in its implementation so there was really no chance that Sarah would ever put words on the site (the same is true for me).</p>
+<p>I switched over to WordPress after seeing some pretty impressive examples of what it does nowadays.</p>
+<p>So as has become my custom, I’ll link back to other sites that I’ve also written.</p>
+<ul>
+<li><a href="chrisblog.zip">chrisblog</a> (Blogger, zip file)</li>
+<li><a href="http://twopoint718.posterous.com/">Nerd Blog</a> (Posterous)</li>
+<li><a href="sencjw_blog.zip">sencjw_blog</a> (zip file)</li>
+</ul>
+      </div>
+    </div>
+    <div id="nav" class="yui-b first">
+<ul class="nav"
+><li
+  ><a href="index.html"
+    >Home</a
+    ></li
+  ><li
+  ><a href="contact.html"
+    >Contact / About Me</a
+    ></li
+  ><li class="current"
+  ><a href="blog.html"
+    >Blog</a
+    ></li
+  ><li
+  ><a href="colophon.html"
+    >Colophon</a
+    ></li
+  ><li
+  ><a href="the-square-root-of-christmas.html"
+    >The Square Root of Christmas</a
+    ></li
+  ><li
+  ><a href="pubkey.html"
+    >PGP Public Key (6D7735C5)</a
+    ></li
+  ><li
+  ><a href="transparent_web.html"
+    >The Transparent Web (Book)</a
+    ></li
+  ></ul
+>
+    </div>
+  </div>
+</body>
+</html>

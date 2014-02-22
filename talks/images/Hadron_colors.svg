@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+
+<svg x="0" y="0" width="200" height="606" version="1.1" 
+	xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve"
+	font-family="sans-serif">
+
+<defs>
+<g id="arrow">
+	<polyline points="-13,0 13,0 13,60 25,50 0,100 -25,50 -13,60"/>
+</g>
+</defs>
+
+<g transform="translate(0,0)">
+	<rect x="0" y="0" width="200" height="200" fill="black" stroke="none" stroke-width="0"/>
+	<text x="2" y="20" fill="white" font-size="20">Meson</text>
+	<g transform="translate(100,115)">	
+		<use xlink:href="#arrow" transform="rotate(120)" style="fill:#ff00ff"/>
+		<text x="-55" y="-55" fill="#ff00ff" font-size="18" text-anchor="middle">Antigreen</text>	
+		<use xlink:href="#arrow" transform="rotate(-60)" style="fill:#00ff00"/>	
+		<text x="55" y="65" fill="#00ff00" font-size="18" text-anchor="middle">Green</text>
+		<circle cx="0" cy="0" r="25"  stroke="none" fill="white"/>
+	</g>
+</g>
+<g transform="translate(0,203)">
+	<rect x="0" y="0" width="200" height="200" fill="black" stroke="none" stroke-width="0"/>
+	<text x="2" y="20" fill="white" font-size="20">Baryon</text>
+	<g transform="translate(100,130)">	
+		<use xlink:href="#arrow" transform="rotate(180)" style="fill:#ff0000"/>
+		<text x="25" y="-50" fill="#ff0000" font-size="18" text-anchor="begin">Red</text>	
+		<use xlink:href="#arrow" transform="rotate(60)" style="fill:#0000ff"/>
+		<text x="-55" y="65" fill="#0000ff" font-size="18" text-anchor="middle">Blue</text>	
+		<use xlink:href="#arrow" transform="rotate(-60)" style="fill:#00ff00"/>	
+		<text x="55" y="65" fill="#00ff00" font-size="18" text-anchor="middle">Green</text>
+		<circle cx="0" cy="0" r="25"  stroke="none" fill="white"/>
+	</g>
+</g>
+<g transform="translate(0,406)">
+	<rect x="0" y="0" width="200" height="200" fill="black" stroke="none" stroke-width="0"/>
+	<text x="2" y="20" fill="white" font-size="20">Antibaryon</text>
+	<g transform="translate(100,95)">	
+		<use xlink:href="#arrow" transform="rotate(00)" style="fill:#00ffff"/>
+		<text x="25" y="50" fill="#00ffff" font-size="18" text-anchor="begin">Antired</text>	
+		<use xlink:href="#arrow" transform="rotate(-120)" style="fill:#ffff00"/>
+		<text x="55" y="-55" fill="#ffff00" font-size="18" text-anchor="middle">Antiblue</text>	
+		<use xlink:href="#arrow" transform="rotate(120)" style="fill:#ff00ff"/>	
+		<text x="-55" y="-55" fill="#ff00ff" font-size="18" text-anchor="middle">Antigreen</text>
+		<circle cx="0" cy="0" r="25"  stroke="none" fill="white"/>
+	</g>
+</g>
+
+
+</svg>

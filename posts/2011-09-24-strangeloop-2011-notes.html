@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>sencjw - strangeloop 2011 notes</title>
+    <link rel="stylesheet" type="text/css" href="../css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="../css/default.css" />
+    <link rel="stylesheet" type="text/css" href="../css/syntax.css" />
+  </head>
+  <body>
+    <div class="content">
+
+      <header>
+        <h1>sencjw</h1>
+        <h2>a place I put stuff</h2>
+      </header>
+
+      <nav>
+        <ul>
+          <li><a href="../">Home</a></li>
+          <li><a href="../archive.html">Blog Archive</a></li>
+          <li><a href="../contact.html">Contact</a></li>
+          <li><a href="../interviews.html">Interviews</a></li>
+          <li><a href="../talks.html">Talks</a></li>
+          <li><a href="../the_square_root_of_christmas.html">The Square Root of Christmas</a></li>
+          <li><a href="../transparent_web.html">The Transparent Web (book)</a></li>
+          <li><a href="../writings.html">Writings</a></li>
+        </ul>
+      </nav>
+
+      <main>
+        <article>
+  <header>
+    <h1>strangeloop 2011 notes</h1>
+    <p>
+      Posted on September 24, 2011
+      
+    </p>
+  </header>
+
+  <p>I got back from <a href="https://thestrangeloop.com/">Strangeloop 2011</a> just this week and wanted to cover some of the interesting points from this <em>really</em> fascinating conference (it is on my <em>must go</em> list from now on)!</p>
+<p>It was incredibly difficult to get to all the talks that I wanted to see because the conference was “seven talks wide” at most points. A common theme emerged where, as I finished up a talk in one room, I would see the stream of tweets start rolling in about some incredible talk that I had just missed; I can’t wait for those videos.</p>
+<p>Here’s my recap of the stuff that I went to:</p>
+<p><strong>Sunday (workshop day)</strong></p>
+<ul>
+<li><em>Haskell: Functional Programming, Solid Code, Big Data</em> with Bryan O’Sullivan - this was a really nice intro to Haskell for someone that hadn’t ever seen it before. I’ve worked through about half of the “Real World Haskell” book so a lot of this was not new. But it was great to see one of the authors explain some points himself. There was also some interesting comments from <a href="http://en.wikipedia.org/wiki/Gerald_Jay_Sussman">Gerald Sussman</a> about how haskell is the “most advanced of the obsolete languages” (more on that later).</li>
+</ul>
+<p><strong>Monday (first day of conference)</strong></p>
+<ul>
+<li><p><em>Category Theory, Monads, and Duality in (Big) Data</em> with Erik Meijer - This was a really cool opening keynote where Erik Meijer launched the new term <em>CoSQL</em> instead of <em>NoSQL</em> by showing how the two concepts are <a href="http://en.wikipedia.org/wiki/Dual_(mathematics)">duals</a> of one another (in the mathematical, category theory sense). This proved to be something of an overarching theme of the conference, things being different but mirrored versions of the same thing. see: <a href="http://queue.acm.org/detail.cfm?id=1961297">A co-Relational Model of Data for Large Shared Data Banks</a>.</p></li>
+<li><p><em>[I skipped this timeslot because I was on the <a href="http://blog.hallwaytrack.org/articles/2006/04/27/the-hallway-track-blog">hallway track</a> listening to Erik Meijer talk about static typing with some scala folks; very interesting!]</em></p></li>
+<li><p><em>An Introduction to Doctor Who (and Neo4j)</em> with Ian Robinson - I have to admit, I got sucked in because I’m a huge Doctor Who fan, but I <em>had</em> heard of graph databases before and Neo4j looked to be a really interesting one. In particular, I wanted to see if this could be used from Clojure (yes: <a href="http://github.com/wagjo/borneo">borneo</a> and <a href="https://github.com/mattrepl/clojure-neo4j">clojure-neo4j</a>). The talk concerend building a very complicated network of the relationships between several Doctor Who props (Daleks!) over time. It was pretty easy to see how these mapped nicely to nodes with arcs between them.</p></li>
+<li><p><em>Skynet: A Scalable, Distributed Service Mesh in Go</em> with Brian Ketelsen - this was a cool talk about a lightweight framework written in <a href="http://golang.org/">go</a> for writing distributed applications that are highly resilient. It uses <a href="https://github.com/ha/doozerd">Doozer</a> for data storage (though it didn’t in this talk).</p></li>
+<li><p><em>Parser Combinators: How to Parse (nearly) Anything</em> with Nate Young - This talk gave examples of writing parser combinators (where a <em>parser</em> here means a function that can consume a little input, and then returns another function that consumes input after it). The idea is to chain these parsers together with <em>combinators</em> (higher-order functions which take parsers and operate on them, like “oneOrMore” etc.). This talk reminded me of Bryan O’Sullivan’s funny phrase about how haskell’s “&gt;&gt;=” operator (read “bind”) is written in “moon language”.</p></li>
+<li><p><em>Getting Truth Out of the DOM</em> with Yehuda Katz - This was a talk about the <a href="http://www.sproutcore.com/">SproutCore</a> framework. Katz had a lot of insight about how to keep the browser interaction abstract and event-based rather than mucking about (and then being mired) in the DOM.</p></li>
+<li><p><em>We Don’t Really Know How to Compute!</em> with Gerald Sussman - This was a mind-blowing keynote. In fact, I had to develop a new unit of measure, the <em>Eureka</em>, which denotes having one’s mind blown once per minute. I think that in the 50-some minute talk that Sussman gave, I may have had more than about 50 mind-blowing thoughts. At one point Sussman asked how much time he had left and someone from the audience yelled out “who cares?”, which was pretty much the feeling in the room.</p>
+<p>Sussman started out the talk with a picture of a <a href="http://en.wikipedia.org/wiki/Illusory_contours">Kanizsa Triangle</a> and mentioned that the brain can infer that there is a hidden triangle in just about 100 ms which is a few tens of “cycles” for the brain. With a computer, we don’t know how to even begin to solve this recognition problem in that few of cycles; <em>we don’t really know how to compute</em>. Sussman’s idea (which I can’t do justice to here), was that computing as we know it has to and will change in the near future. Computing will become massively distributed (“ambient”, but this term is from a later talk) and in disparate nodes that must collaborate to arrive at answers.</p>
+<p>His <a href="http://groups.csail.mit.edu/mac/projects/amorphous/Robust/">example</a>, a <em>Propagator</em> was a program that can integrate more annd more data while keeping track of the provenance of that data. Or another way an “independent stateless machine connecting stateful cells”. Amazing!</p></li>
+</ul>
+<p><strong>Tuesday (second day of conference)</strong></p>
+<ul>
+<li><p><em>Embedding Ruby and RubyGems Over RedBridge</em> with Yoko Harada - This didn’t make that much sense to me until coworker (<span class="citation">@devn</span>) started doing some cool stuff with using ruby gems from clojure.</p></li>
+<li><p><em>Event Driven Programming in Clojure</em> with Zach Tellman - This was a really cool talk. It looked to me to be an implementation of go-style concurrency (channels) in clojure. There was also a macro that would analyze data dependencies and do the correct async calls. The projects are called <a href="http://github.com/ztellman/lamina">Lamina</a> and <a href="http://github.com/ztellman/aleph">Aleph</a> and they’re one of those things that I want to find a project on which to use them.</p></li>
+<li><p><em>Teaching Code Literacy</em> with Sarah Allen - This was a talk about how to give kids the opportunity to learn about programming at an early age (Allen says that programming is one of those things that you don’t know if you’ll like it until you’ve tried it.) She also had found that the ages that programming should be introduced is 5th-6th grade; earlier than I thought!</p></li>
+<li><p><em>Post-PC Computing is not a Vision</em> with Allen Wirfs-Brock - This talk started with a breakdown of the eras of computing. First was a “coporate” era, then a “personal” era, and now we are entering the “ambient” era. Each era is defined by what ends computing resources are put toward. In the coporate era computing was used to solve problems that businesses had, then computing became more available generally, and finally it is becoming ubiquitous. This talk also covered the history of the browser and how it is, and will be, the platform for the forseeable future.</p></li>
+<li><p><em>Simple Made Easy</em> with Rich Hickey - Rich’s talk was an argument for disentangling computing. It started with separating the notions of “simple”, “complex”, and “easy”. Easy is a subjective thing, things that I find easy you may not. Simple is objective, it derives from the notion of “a single fold”. Complex is just the opposite, it is “woven or braided”. We must avoid adding complexity to our software, or as Rich put it, we must not “complect” it (“to interweave or entwine”). Humans have a finite (and very limited) ability to handle many factors simultaneously, and so to have any hope of working with difficult problems, we must be rigorous in working toward simplicity.</p></li>
+</ul>
+<p>Rich had a few words for TDD in his talk, and I think these were widely misinterpreted. His point was simply that tests have a cost and a thoughtless devotion to them will risk underestimating that cost. I think a lot of people took that to mean “you shouldn’t test” or that “tests are worthless”, but I think he was just pointing out that they’re not free. He introduced the term “guardrail programming” for a style that just bounces between the guardrails rather than proceeds to a destination by steering.</p>
+<p>This talk drew a standing ovation from the crowd, including, I hear, Gerald Sussman. I’ll be looking for it on video when it comes out.</p>
+<p>Strangeloop 2011+N is definitely on my must-attend list. The people that I met (which could be another couple of blog posts) were worth the admission all by themselves. The talks were fascinating and gave me a ton to read up on. The conference felt like it was well-run and organized. St. Louis was a cool city to hang out in (I wish we had the same open-container law in Madison!). I can’t wait for next year.</p>
+</article>
+
+      </main>
+
+    </div>
+  </body>
+</html>
