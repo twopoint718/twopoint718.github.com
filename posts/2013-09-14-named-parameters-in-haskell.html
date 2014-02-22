@@ -46,7 +46,7 @@
 <pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">function</span> <span class="fu">make_person</span>(first, last, phone) {...}
 <span class="kw">function</span> <span class="fu">make_person</span>(last, first, phone) {...}
 <span class="kw">function</span> <span class="fu">make_person</span>(phone, first, last) {...}</code></pre>
-<p>If you encountered a wild <code>make_person</code>, you’d have to know which definition was the one that was used. The point is it really doesn’t matter that a person’s attributes are listed in that order. Any order is fine. But you’ve, implicitly, introduced a strict order-dependence here. Passing in a map/object/hash fixes this issue:</p>
+<p>If you encountered a wild <code>make_person</code>, you’d have to know which definition was the one that was used. The point is it really doesn’t matter that a person’s attributes are listed in that order. Any order is fine. But you’ve, implicitly, introduced a strict order-dependence here. Passing in a map/object/hash fixes this issue<sup><a href="#fn1" class="footnoteRef" id="fnref1">1</a></sup>:</p>
 <pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">function</span> <span class="fu">make_person</span>(opts) {
   opts[<span class="st">'first'</span>] = ...
   <span class="fu">opts</span>[<span class="st">'last'</span>] = ...
@@ -138,6 +138,12 @@ main <span class="fu">=</span> putStrLn <span class="fu">$</span> formatEmail (<
 
 chris<span class="fu">^.</span>phone<span class="fu">^.</span><span class="kw">type</span> <span class="co">-- equals &quot;mobile&quot;</span></code></pre>
 <p>So, in summary, I feel that lenses provide a credible solution to the named-record/non-positional/keyword arguments problem. Go forth and hack.</p>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Well, <em>almost</em>. The ideal thing would be a typed record of some sort so that the function’s access would be guaranteed to be safe. If this weren’t the case then you’d have lost the safety that parameters give you. With parameters, it is instantly obvious if there’s one missing, the call is simply <em>wrong</em>. Likewise with typed records, accessing a field that doesn’t exist would be a compile-time error. In Ruby-style hash access, you’d just get a <code>nil</code> for any missing field/value.<a href="#fnref1">↩</a></p></li>
+</ol>
+</div>
 </article>
 
       </main>
