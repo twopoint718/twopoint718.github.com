@@ -1,0 +1,508 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>sencjw: blog</title>
+        <link>http://sencjw.com</link>
+        <description><![CDATA[This feed is for blog entries]]></description>
+        <atom:link href="http://sencjw.com/feed.rss" rel="self"
+                   type="application/rss+xml" />
+        <lastBuildDate>Wed, 30 Apr 2014 00:00:00 UT</lastBuildDate>
+        <item>
+    <title>Lenses 101 (for me)</title>
+    <link>http://sencjw.com/posts/2014-04-30-lenses-101.html</link>
+    <description><![CDATA[<article>
+  <header>
+    <h1>Lenses 101 (for me)</h1>
+    <p>
+      Posted on April 30, 2014
+      
+    </p>
+  </header>
+
+  <p><em>Note:</em> This is a short commentary on the new <a href="http://www.serpentine.com/wreq/">wreq library</a>. These comments were directed at my coworkers, but I thought they’d be interesting here. This post is literate Haskell, you should be able to cut-n-paste.</p>
+<hr />
+<pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="ot">{-# LANGUAGE TemplateHaskell #-}</span>
+<span class="ot">&gt;</span> <span class="kw">module</span> <span class="dt">Main</span> <span class="kw">where</span>
+<span class="ot">&gt;</span> <span class="kw">import</span> Control.Lens</code></pre>
+<p>I think a big reason why I’m so stoked about this is that it’s a solid library that’s offering a lens-based API (something that I think will show up more and more as time goes on). I’m still digging into them, but lenses are sort of like the “.” (dot) from Ruby, but implemented as a library and infinitely more flexible:</p>
+<p>Getters:</p>
+<p>your basic “getter” is ^. (carrot-dot, aka “view”) It lets you “view” things:</p>
+<pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="co">-- basic &quot;Person&quot; data</span>
+<span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Person</span> <span class="fu">=</span> <span class="dt">Person</span> {_<span class="ot">fn::</span><span class="dt">String</span>, _<span class="ot">ln::</span><span class="dt">String</span>, _<span class="ot">email::</span><span class="dt">String</span>} <span class="kw">deriving</span> <span class="dt">Show</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; me ::</span> <span class="dt">Person</span>
+<span class="ot">&gt;</span> me <span class="fu">=</span> <span class="dt">Person</span> {_fn<span class="fu">=</span><span class="st">&quot;Chris&quot;</span>, _ln<span class="fu">=</span><span class="st">&quot;Wilson&quot;</span>, _email<span class="fu">=</span><span class="st">&quot;chris@bendyworks.com&quot;</span>}
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="fu">$</span>(makeLenses <span class="ch">&#39;&#39;</span><span class="dt">Person</span>) <span class="co">-- autogen the getters/setters</span></code></pre>
+<p>And using it to view inside the Person datatype:</p>
+<pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> ex1 <span class="fu">=</span> me<span class="fu">^.</span>fn
+<span class="ot">&gt;</span> <span class="co">-- &quot;Chris&quot;</span>
+<span class="ot">&gt;</span> ex2 <span class="fu">=</span> me<span class="fu">^.</span>email
+<span class="ot">&gt;</span> <span class="co">-- &quot;chris@bendyworks.com&quot;</span></code></pre>
+<p>Next you’ve got your “setter” (it just updates, non-destructively returning a new thing), also called “set”:</p>
+<pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> ex3 <span class="fu">=</span> set fn <span class="st">&quot;Christopher&quot;</span> me
+<span class="ot">&gt;</span> <span class="co">-- Person {_fn = &quot;Christopher&quot;, _ln = &quot;Wilson&quot;, _email = &quot;chris@bendyworks.com&quot;}</span></code></pre>
+<p>or saying it with operators (the &amp; above is reverse function application, the function on the right is applied to the data on the left, kinda like a shell pipeline):</p>
+<pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> ex4 <span class="fu">=</span> me <span class="fu">&amp;</span> fn<span class="fu">.~</span><span class="st">&quot;Christopher&quot;</span>
+<span class="ot">&gt;</span> <span class="co">-- Person {_fn = &quot;Christopher&quot;, _ln = &quot;Wilson&quot;, _email = &quot;chris@bendyworks.com&quot;}</span></code></pre>
+<p>“But Chris!” you interject, “that’s just lame-o ‘.’ that’s in Ruby ALREADY! Show me some lazer-beam stuff!” Okay, lenses also do traversing! That is you can get/set a bunch of things at once:</p>
+<pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="co">-- bendyworks</span>
+<span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Bendyworks</span> <span class="fu">=</span> <span class="dt">Bendyworks</span> {_<span class="ot">employees::</span>[<span class="dt">Person</span>]} <span class="kw">deriving</span> <span class="dt">Show</span>
+<span class="ot">&gt;</span> <span class="fu">$</span>(makeLenses <span class="ch">&#39;&#39;</span><span class="dt">Bendyworks</span>)
+<span class="ot">&gt;</span> <span class="co">-- some setting up</span>
+<span class="ot">&gt;</span> bendy <span class="fu">=</span> <span class="dt">Bendyworks</span> {_employees <span class="fu">=</span>
+<span class="ot">&gt;</span>     [ <span class="dt">Person</span> <span class="st">&quot;Amy&quot;</span> <span class="st">&quot;Unger&quot;</span> <span class="st">&quot;amy@bendyworks.com&quot;</span>
+<span class="ot">&gt;</span>     <span class="co">-- ...</span>
+<span class="ot">&gt;</span>     , <span class="dt">Person</span> <span class="st">&quot;Will&quot;</span> <span class="st">&quot;Strinz&quot;</span> <span class="st">&quot;will@bendyworks.com&quot;</span>
+<span class="ot">&gt;</span>     ]} <span class="co">-- all employees (imagine)</span></code></pre>
+<p>Now we traverse over the employees field of the Bendyworks structure, and we can compose a getter with that!</p>
+<pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> ex5 <span class="fu">=</span> bendy <span class="fu">^..</span> employees<span class="fu">.</span>traversed<span class="fu">.</span>fn
+<span class="ot">&gt;</span> <span class="co">-- [&quot;Amy&quot;, ..., &quot;Will&quot;]</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> ex6 <span class="fu">=</span> bendy <span class="fu">^..</span> employees<span class="fu">.</span>traversed<span class="fu">.</span>email
+<span class="ot">&gt;</span> <span class="co">-- [&quot;amy@bendyworks.com&quot;, ..., &quot;will@bendyworks.com&quot;]</span></code></pre>
+<p>The thing that’s kinda cool is that “employees.traversed.fn” forms a sort-of lens on the whole Bendyworks datatype, letting us walk over it and pull out values. The traversal is a first-class thing (those ’.’s in the name are just plain-old function composition!). We can store it and use it as a new accessor:</p>
+<pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; emails ::</span> <span class="dt">Traversal&#39;</span> <span class="dt">Bendyworks</span> <span class="dt">String</span>
+<span class="ot">&gt;</span> emails <span class="fu">=</span> employees<span class="fu">.</span>traversed<span class="fu">.</span>email
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> ex7 <span class="fu">=</span> bendy <span class="fu">^..</span> emails
+<span class="ot">&gt;</span> <span class="co">-- [...] -- just like above</span></code></pre>
+<p>They’re really composable! You can set a traversal with your old friend .~ (set):</p>
+<pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> ex8 <span class="fu">=</span> bendy <span class="fu">&amp;</span> emails <span class="fu">.~</span> <span class="st">&quot;[HIDDEN]&quot;</span>
+<span class="ot">&gt;</span> <span class="co">-- Bendyworks {_employees = [Person {_fn=&quot;Amy&quot;,...,_email=&quot;[HIDDEN]&quot;}, ...]}</span></code></pre>
+<p>That’s simultaneously setting the emails of all Bendyworkers to the string “[HIDDEN]”. Notice how, if you squint, it’s like the .~ is a SUPER-DOT that can set a bunch of stuff at once. I think it is way cool. I’m just starting to look at the lens library and it’s big. There are tons of functions in there and a lot ground covered. But I think that as time goes on this will become pretty common. Functional getters and setters FTW!</p>
+</article>
+]]></description>
+    <pubDate>Wed, 30 Apr 2014 00:00:00 UT</pubDate>
+    <guid>http://sencjw.com/posts/2014-04-30-lenses-101.html</guid>
+</item>
+<item>
+    <title>Feynman Understands Programming</title>
+    <link>http://sencjw.com/posts/2014-04-22-feynman-understands-programming.html</link>
+    <description><![CDATA[<article>
+  <header>
+    <h1>Feynman Understands Programming</h1>
+    <p>
+      Posted on April 22, 2014
+      
+    </p>
+  </header>
+
+  <p>Watch this video of Feynman explaining how he does physics work. Programming works the same way!</p>
+<p>Here’s the translation key: replace “theory” with “a potential program that solves my problem.” And replace “consequences of the theory” with either the correct operation of the program or of bugs (as revealed by tests breaking). All the intervening layers of software make it hard to <em>really</em> know what’s going on. The best that we can hope for is, like Feynman explains, “qualitative understanding” of what the program should do. Before we can write programs, we have to have an idea of what we expect that program to do. Critically, we also have to have an idea of <em>if</em> that expectation were true (or false) <em>what other things would we expect to see?</em> Programming is hard because we have to envision these other phantom worlds and treat them as equally real until we know they aren’t.</p>
+<p>Stay tuned for when he begins talking about how important unbroken stretches of time are for working on (programming). Feynman’s solution is to cultivate an aura of <em>irresponsibility</em> so that he’ll have time to do physics.</p>
+<iframe
+  width="420"
+  height="315"
+  src="//www.youtube.com/embed/Bgaw9qe7DEE?start=2160"
+  frameborder="0" allowfullscreen>
+</iframe>
+
+
+</article>
+]]></description>
+    <pubDate>Tue, 22 Apr 2014 00:00:00 UT</pubDate>
+    <guid>http://sencjw.com/posts/2014-04-22-feynman-understands-programming.html</guid>
+</item>
+<item>
+    <title>A Working Computer</title>
+    <link>http://sencjw.com/posts/2014-03-27-working-computer.html</link>
+    <description><![CDATA[<article>
+  <header>
+    <h1>A Working Computer</h1>
+    <p>
+      Posted on March 27, 2014
+      
+    </p>
+  </header>
+
+  <p>Just thought that I’d make a tiny little post here and mention that I got my <a href="http://www.nand2tetris.org/">nand2tetris</a> computer up and running. That is, I finished off the CPU (which has some tricky parts) and connected it up to the 32K ROM and the Memory (also screen and keyboard memory maps).</p>
+<p>I’m now at the point where I can begin implementing the software stack that the platform uses. I’ve started out by writing the assembler in Haskell. We’ll see how this goes.</p>
+<p>If this is the first you’re hearing about nand2tetris, and if additionally, you enjoy hardware-y sorts of things, then I can’t recommend this course enough. It has been like a light going on in my head for understanding how these <a href="https://www.youtube.com/watch?v=EKWGGDXe5MA">silly little computers</a> all around us work!</p>
+</article>
+]]></description>
+    <pubDate>Thu, 27 Mar 2014 00:00:00 UT</pubDate>
+    <guid>http://sencjw.com/posts/2014-03-27-working-computer.html</guid>
+</item>
+<item>
+    <title>ChiHack</title>
+    <link>http://sencjw.com/posts/2013-11-08-chihack.html</link>
+    <description><![CDATA[<article>
+  <header>
+    <h1>ChiHack</h1>
+    <p>
+      Posted on November  8, 2013
+      
+    </p>
+  </header>
+
+  <p>As I continue my leisurely foray into the world of Haskell, I have come upon a bivouac of Haskellers near Chicago this weekend. Myself and a co-worker from the office will be attending the first-ever <a href="https://plus.google.com/events/cc4njkf8kh5aho6soboisv6c7rc">ChiHack</a>. Maybe I can get someone to explain <a href="http://www.mpi-sws.org/~skilpat/backpack/">Backpack</a> to me.</p>
+</article>
+]]></description>
+    <pubDate>Fri, 08 Nov 2013 00:00:00 UT</pubDate>
+    <guid>http://sencjw.com/posts/2013-11-08-chihack.html</guid>
+</item>
+<item>
+    <title>reactive_record</title>
+    <link>http://sencjw.com/posts/2013-10-03-reactive-record.html</link>
+    <description><![CDATA[<article>
+  <header>
+    <h1>reactive_record</h1>
+    <p>
+      Posted on October  3, 2013
+      
+    </p>
+  </header>
+
+  <p>Just wanted to make a quick note that I have published my first gem, <a href="https://rubygems.org/gems/reactive_record">reactive_record</a>, on rubygems. It is a utility that lets you “export” constraints from your existing postgres database, creating Rails models.</p>
+<p>It is pretty early, but I have put in a lot of work and I hope that it is useful for your projects.</p>
+</article>
+]]></description>
+    <pubDate>Thu, 03 Oct 2013 00:00:00 UT</pubDate>
+    <guid>http://sencjw.com/posts/2013-10-03-reactive-record.html</guid>
+</item>
+<item>
+    <title>named parameters in haskell</title>
+    <link>http://sencjw.com/posts/2013-09-14-named-parameters-in-haskell.html</link>
+    <description><![CDATA[<article>
+  <header>
+    <h1>named parameters in haskell</h1>
+    <p>
+      Posted on September 14, 2013
+      
+    </p>
+  </header>
+
+  <p>I was watching <a href="https://www.youtube.com/watch?v=rI8tNMsozo0">Rich Hickey’s keynote</a> for Rails Conf 2012. I’ve been watching a lot of talks lately because I’ve organized a series of conference talk screenings at my work. And that’s probably a different blog post…</p>
+<p>Anyhow, one thing that he mentioned that I don’t often think about is the complexity introduced with positional parameters. Let me explain:</p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">function</span> <span class="fu">foo</span>(x, y, z,) {...}</code></pre>
+<p>Requires that x, y, and z all be present in that exact order even if that’s not important:</p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">function</span> <span class="fu">make_person</span>(first, last, phone) {...}
+<span class="kw">function</span> <span class="fu">make_person</span>(last, first, phone) {...}
+<span class="kw">function</span> <span class="fu">make_person</span>(phone, first, last) {...}</code></pre>
+<p>If you encountered a wild <code>make_person</code>, you’d have to know which definition was the one that was used. The point is it really doesn’t matter that a person’s attributes are listed in that order. Any order is fine. But you’ve, implicitly, introduced a strict order-dependence here. Passing in a map/object/hash fixes this issue<sup><a href="#fn1" class="footnoteRef" id="fnref1">1</a></sup>:</p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">function</span> <span class="fu">make_person</span>(opts) {
+  opts[<span class="st">&#39;first&#39;</span>] = ...
+  <span class="fu">opts</span>[<span class="st">&#39;last&#39;</span>] = ...
+  <span class="fu">opts</span>[<span class="st">&#39;phone&#39;</span>] = ...
+}</code></pre>
+<p>Haskell is pretty tied to the positional and unnamed argument thing. I was looking into how to do named and/or non-positional arguments.</p>
+<h3 id="datatype">Datatype</h3>
+<p>The first thing that occurred to me is to do something like this:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">import</span> Text.Printf
+
+<span class="kw">data</span> <span class="dt">Person</span> <span class="fu">=</span> <span class="dt">Person</span> {<span class="ot"> firstName ::</span> <span class="dt">String</span>
+                     ,<span class="ot"> lastName ::</span> <span class="dt">String</span>
+                     ,<span class="ot"> email ::</span> <span class="dt">String</span>
+                     }
+
+<span class="ot">formatAddress ::</span> <span class="dt">Person</span> <span class="ot">-&gt;</span> <span class="dt">String</span>
+formatAddress p <span class="fu">=</span> printf <span class="st">&quot;\&quot;%s %s\&quot; &lt;%s&gt;&quot;</span> f l e
+  <span class="kw">where</span>
+    f <span class="fu">=</span> firstName p
+    l <span class="fu">=</span> lastName p
+    e <span class="fu">=</span> email p</code></pre>
+<p>And then I call it like so:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">formatAddress <span class="dt">Person</span> { firstName <span class="fu">=</span> <span class="st">&quot;Chris&quot;</span>
+                     , lastName <span class="fu">=</span> <span class="st">&quot;Wilson&quot;</span>
+                     , email <span class="fu">=</span> <span class="st">&quot;chris@bendyworks.com&quot;</span>
+                     }</code></pre>
+<p>A slightly better tweak is to create a default that provides values for anything that’s missing (assuming that I have a function that just calls for one parameter):</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">formatEmail p <span class="fu">=</span> printf <span class="st">&quot;&lt;%s&gt;&quot;</span> (email p)
+
+defaultPerson <span class="fu">=</span> <span class="dt">Person</span> {firstName <span class="fu">=</span> <span class="st">&quot;&quot;</span>, lastName <span class="fu">=</span> <span class="st">&quot;&quot;</span>, email <span class="fu">=</span> <span class="st">&quot;&quot;</span>}</code></pre>
+<p>But that “infects” the call site with the <code>defaultPerson</code> argument:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">formatEmail defaultPerson {email<span class="fu">=</span><span class="st">&quot;chris@bendyworks.com&quot;</span>}</code></pre>
+<p>All the other, irrelevant arguments are defaulted by the <code>defaultPerson</code> constructor.</p>
+<h3 id="named-records">Named Records</h3>
+<p>This pulls in the big guns of template Haskell to abstract machinery something like what is spelled out above:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">{-# LANGUAGE TemplateHaskell #-}</span>
+
+<span class="kw">import</span> Data.NamedRecord
+<span class="kw">import</span> Text.Printf
+<span class="kw">import</span> Data.Name
+
+name <span class="st">&quot;firstName&quot;</span>
+name <span class="st">&quot;lastName&quot;</span>
+name <span class="st">&quot;email&quot;</span>
+
+record <span class="st">&quot;Person&quot;</span>
+    <span class="ot">`has`</span> <span class="st">&quot;firstName&quot;</span> <span class="fu">:=</span> <span class="ch">&#39;&#39;</span><span class="dt">String</span>
+    <span class="ot">`has`</span> <span class="st">&quot;lastName&quot;</span>  <span class="fu">:=</span> <span class="ch">&#39;&#39;</span><span class="dt">String</span>
+    <span class="ot">`has`</span> <span class="st">&quot;email&quot;</span>     <span class="fu">:=</span> <span class="ch">&#39;&#39;</span><span class="dt">String</span>
+
+<span class="ot">formatEmail ::</span> <span class="dt">Person</span> <span class="ot">-&gt;</span> <span class="dt">String</span>
+formatEmail p <span class="fu">=</span> printf <span class="st">&quot;&lt;%s&gt;&quot;</span> e
+  <span class="kw">where</span>
+    e <span class="fu">=</span> p <span class="ot">`get`</span> email</code></pre>
+<p>But it has a rather pleasant usage:</p>
+<pre><code>formatEmail (newPerson `set` email := &quot;chris@bendyworks.com&quot;)</code></pre>
+<p>There is also a nice way to do <a href="http://hackage.haskell.org/packages/archive/named-records/0.5/doc/html/Data-NamedRecord.html">default arguments</a>. Go check it out, the docs are good.</p>
+<h3 id="lenses">Lenses</h3>
+<p>Okay, I have to admit that I’m less sure about this. Metaphor-weary haskellers please forgive me, but lenses seem to be the space-based laser (SBL) of the Haskell world right now. While the idea is simple, you’d like a way to pinpoint a structure for observation or (destructive) modification, the actual infrastructure surrounding it is rather elaborate. On the <a href="https://www.youtube.com/watch?v=D6sva6hGJ-s">Haskell Cast #1</a>, Edward Kmett goes into the details of the lens library. A few “<a href="http://patternsinfp.wordpress.com/2011/01/31/lenses-are-the-coalgebras-for-the-costate-comonad/">lenses are the coalgebras for the costate comonad</a>”s are thrown around and there’s generally a lot sailing over my head.</p>
+<p>On iota of wisdom that I pulled down from the stratosphere was that lenses are a kind of “getter” and “setter”, albeit ones with firm FP grounding. These can be used to effectively create flexible parameters to functions. “Flexible” just means:</p>
+<ul>
+<li>a pool of parameters to draw from</li>
+<li>that are named rather than positional</li>
+<li>and not all have to pe present</li>
+</ul>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">{-# LANGUAGE TemplateHaskell #-}</span>
+<span class="kw">import</span> Control.Lens
+<span class="kw">import</span> Text.Printf
+
+<span class="kw">data</span> <span class="dt">Person</span> <span class="fu">=</span> <span class="dt">Person</span> { _<span class="ot">firstName ::</span> <span class="dt">String</span>
+                     , _<span class="ot">lastName ::</span> <span class="dt">String</span>
+                     , _<span class="ot">email ::</span> <span class="dt">String</span>
+                     }
+
+makeLenses <span class="ch">&#39;&#39;</span><span class="dt">Person</span>
+
+<span class="co">-- use the &quot;email&quot; getter</span>
+formatEmail p <span class="fu">=</span> printf <span class="st">&quot;&lt;%s&gt;&quot;</span> (p<span class="fu">^.</span>email)
+
+<span class="co">-- issues a warning, but works.</span>
+main <span class="fu">=</span> putStrLn <span class="fu">$</span> formatEmail (<span class="dt">Person</span>{_email<span class="fu">=</span><span class="st">&quot;chris@bendyworks.com&quot;</span>})</code></pre>
+<p>Whew. It feels like cheating, but I really like how this works. Lenses let me “focus” on each field in my data structure by name (or position).</p>
+<p>Lenses seem to fulfill the three bullets that I listed and they do so in the most “natural” way. I say that because, as Edward Kmett, goes into, lenses are useful for a bunch of other stuff and they compose really nicely:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">Person</span> <span class="fu">=</span> <span class="dt">Person</span> { <span class="co">-- ...like above...</span>
+                     , _phone <span class="fu">=</span> <span class="dt">Phone</span> { _number <span class="fu">=</span> <span class="st">&quot;...&quot;</span>, _type <span class="fu">=</span> <span class="st">&quot;mobile&quot;</span> }
+                     }
+
+<span class="kw">data</span> <span class="dt">Phone</span> <span class="fu">=</span> <span class="dt">Phone</span> { _<span class="ot">number ::</span> <span class="dt">String</span>, _<span class="ot">type ::</span> <span class="dt">String</span> }
+
+chris<span class="fu">^.</span>phone<span class="fu">^.</span><span class="kw">type</span> <span class="co">-- equals &quot;mobile&quot;</span></code></pre>
+<p>So, in summary, I feel that lenses provide a credible solution to the named-record/non-positional/keyword arguments problem. Go forth and hack.</p>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Well, <em>almost</em>. The ideal thing would be a typed record of some sort so that the function’s access would be guaranteed to be safe. If this weren’t the case then you’d have lost the safety that parameters give you. With parameters, it is instantly obvious if there’s one missing, the call is simply <em>wrong</em>. Likewise with typed records, accessing a field that doesn’t exist would be a compile-time error. In Ruby-style hash access, you’d just get a <code>nil</code> for any missing field/value.<a href="#fnref1">↩</a></p></li>
+</ol>
+</div>
+</article>
+]]></description>
+    <pubDate>Sat, 14 Sep 2013 00:00:00 UT</pubDate>
+    <guid>http://sencjw.com/posts/2013-09-14-named-parameters-in-haskell.html</guid>
+</item>
+<item>
+    <title>code budget</title>
+    <link>http://sencjw.com/posts/2013-08-20-code-budget.html</link>
+    <description><![CDATA[<article>
+  <header>
+    <h1>code budget</h1>
+    <p>
+      Posted on August 20, 2013
+      
+    </p>
+  </header>
+
+  <p>At almost the moment a new project begins, we start the ritual of estimation. Guess how long this will take. Guess how much this will cost. How about if we change that feature to this feature? The goal of all this prognostication is to try to fit a potentially infinite product within the finite means we have available to us in terms of money, people, and (sometimes overlooked) political will.</p>
+<p>These are all precious and limited resources that we must <em>spend</em>; we trade what we can afford for the software we want. Grouped among these precious and limited resources, I think we must include <em>lines of code</em>. As <a href="http://www.cs.utexas.edu/~EWD/transcriptions/EWD10xx/EWD1036.html">Dijkstra</a> noted, that lines of code added are being recorded in the <em>wrong side of the ledger</em>. This means that as code is added to a codebase the difficulty of making changes or future additions keeps going up. This has a self-limiting effect in the same way that a dollar budget is self-limiting: when you exceed the budget you should examine the goals and outcomes of the project.</p>
+<p>That’s my proposal. At the start of a project estimate the quantity of code needed to solve the business problem. This is hard in the same ways that other estimation is hard, but with time and practice, should be doable. When this budget is exceeded it should trigger some tough questions about the state that the project is in. Why have we used more lines of code than we thought? Could this be refactored? A benefit of the code budget is that it will force the team to examine the codebase at exactly the time that projects tend to be in maximum crunch mode. This hard check is a good thing that keeps everyone grounded in quality when all other external signals are screaming everything but.</p>
+</article>
+]]></description>
+    <pubDate>Tue, 20 Aug 2013 00:00:00 UT</pubDate>
+    <guid>http://sencjw.com/posts/2013-08-20-code-budget.html</guid>
+</item>
+<item>
+    <title>nand2tetris: low-level love</title>
+    <link>http://sencjw.com/posts/2013-08-07-nand2tetris--low-level-love.html</link>
+    <description><![CDATA[<article>
+  <header>
+    <h1>nand2tetris: low-level love</h1>
+    <p>
+      Posted on August  7, 2013
+      
+    </p>
+  </header>
+
+  <p>I’ve been working through <em>The Elements of Computing Systems</em>, or as it is sometimes called <a href="http://nand2tetris.org">nand2tetris</a>. This is a fun course where you start out by being given (say: from God) the humble nand gate (file photo below):</p>
+<p><img src="http://upload.wikimedia.org/wikipedia/commons/e/e6/NAND_ANSI_Labelled.svg"
+     width="300"
+     alt="Schematic of a nand gate"></p>
+<p>And here’s a nude photo (showing how one would be implemented):</p>
+<p><img src="http://upload.wikimedia.org/wikipedia/commons/d/d4/TTL_npn_nand.svg"
+     width="300"
+     alt="Electrical schematic of a nand gate"></p>
+<p>But as far as nand2tetris is concerned, you can just assume that the above is a fact of life. You have a nand tree. So what do you do? well you start on an adventure where you define <em>Not</em> then <em>And</em> then <em>Nor</em> and, well you get the idea. Soon you find that you have a working <a href="https://en.wikipedia.org/wiki/Arithmetic_logic_unit">ALU</a>.</p>
+<p>I’m currently on the cusp of making the hardware to software jump. All along I’ve been having a blast wiring up these little beasties in <a href="https://en.wikipedia.org/wiki/Hardware_description_language">HDL</a></p>
+<p>The course finishes up with implementing cool software in a HLL language. I haven’t peeped this far ahead but it is supposed to be akin to Java. Oh yeah, by the time you get to this point you’ll have implemented the compiler for this language, the VM that it runs in, the raw machine code the VM is written in, the CPU that runs that machine code, and so on. It goes all the way back to that humble nand gate that you started out with.</p>
+<p>I hope to post some updates as I progress through the course, <del>but the quickest way is to check my commits over on my n2t github project.</del></p>
+<p><em>Edit: sorry to say this, but I’ve taken down that repo since it conflicts with the wishes of the authors of the course.</em></p>
+<p>As a slight digression, but surely belonging here, this has been something of a summer-o-hardware for me. I started reading <a href="http://www.charlespetzold.com/code/">CODE</a> by Charles Petzold a while back and the bottom-up description of computing that he laid out was intoxicating. I had to learn more and get my hands dirty with bits and bytes. And that’s when my hardware voyage began.</p>
+<p>In keeping with this theme, here’s a short reading list if you want to blast your brain with computing. In fact, I bet that if you were to go through all these books it’d be like getting a degree in computer science – with a minor in cool-nerd history:</p>
+<ul>
+<li><a href="http://www.amazon.com/dp/1400096235">The Information</a> by James Gleick</li>
+<li><a href="http://www.amazon.com/Elements-Computing-Systems-Building-Principles/dp/0262640686">The Elements of Computing Systems</a> by Nisan and Schocken</li>
+<li><a href="http://www.charlespetzold.com/code/">CODE</a> by Charles Petzold</li>
+<li><a href="http://computationbook.com">Understanding Computation</a> by Tom Stuart</li>
+<li><a href="http://www.amazon.com/Gödel-Escher-Bach-Eternal-Golden/dp/0465026567">Gödel, Escher, Bach</a> by Douglas R. Hofstadter</li>
+</ul>
+<p>There you have it. Go off and hack hardware!</p>
+</article>
+]]></description>
+    <pubDate>Wed, 07 Aug 2013 00:00:00 UT</pubDate>
+    <guid>http://sencjw.com/posts/2013-08-07-nand2tetris--low-level-love.html</guid>
+</item>
+<item>
+    <title>Lists out of lambdas and boxes out of functions</title>
+    <link>http://sencjw.com/posts/2013-04-06-lists-out-of-lambdas-and-boxes-out-of-functions.html</link>
+    <description><![CDATA[<article>
+  <header>
+    <h1>Lists out of lambdas and boxes out of functions</h1>
+    <p>
+      Posted on April  6, 2013
+      
+    </p>
+  </header>
+
+  <p>There’s a cool article by Steve Losh called <a href="http://stevelosh.com/blog/2013/03/list-out-of-lambda/">List out of Lambda</a> that reminded me, in a really good way, of a section in SICP. If you want to read the boiled-down scheme version that’s in SICP, here it is (my paraphrasing from <a href="http://mitpress.mit.edu/sicp/full-text/book/book-Z-H-14.html#%_sec_2.1.3">SICP section 2.1.3</a>)</p>
+<p><code>cons</code> makes a list by putting an element onto the front of an existing list.</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">(<span class="kw">cons</span> <span class="dv">1</span> &#39;()) <span class="co">; &#39;(1)</span></code></pre>
+<p>that’s empty list <code>'()</code> and a list with just “1” in it above <code>'(1)</code>. There’s two other functions that deconstruct a list: <code>car</code> and <code>cdr</code>, or head and tail (name’s not really important):</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">(<span class="kw">car</span> &#39;(<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span>)) <span class="co">; 1</span>
+(<span class="kw">cdr</span> &#39;(<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span>)) <span class="co">; &#39;(2 3)</span></code></pre>
+<p><code>car</code> returns the head of the list and <code>cdr</code> returns the rest of the list (without the head). You’d think that <code>car</code>, <code>cdr</code>, and <code>cons</code> would pretty much have to be built in functions, but actually they don’t!</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">(<span class="kw">define</span><span class="fu"> </span>(<span class="kw">cons</span> x y)
+  (<span class="kw">define</span><span class="fu"> </span>(dispatch m)
+    (<span class="kw">cond</span> ((<span class="kw">=</span> m <span class="dv">0</span>) x)
+          ((<span class="kw">=</span> m <span class="dv">1</span>) y)
+          (<span class="kw">else</span> (error <span class="st">&quot;Argument not 0 or 1 -- CONS&quot;</span> m))))
+  dispatch)</code></pre>
+<p>This is the trickiest thing to grok, but then you’re in the clear. Calling <code>cons</code> returns a function (called <code>dispatch</code>) which “closes” over its two arguments. That means that the function is implicitly storing <code>x</code> and <code>y</code> off where function arguments are stored. <code>dispatch</code> takes a single argument, <code>m</code>, which acts like a kind of selector. If <code>m == 0</code>, then dispatch returns the first argument to <code>cons</code>, if <code>m == 1</code>, then <code>dispatch</code> returns the second argument to <code>cons</code>.</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">((<span class="kw">cons</span> <span class="dv">1</span> &#39;(<span class="dv">2</span> <span class="dv">3</span>)) <span class="dv">0</span>) <span class="co">; 1</span>
+((<span class="kw">cons</span> <span class="dv">1</span> &#39;(<span class="dv">2</span> <span class="dv">3</span>)) <span class="dv">1</span>) <span class="co">; &#39;(2 3)</span></code></pre>
+<p>Now we just define <code>car</code> and <code>cdr</code> to do exactly this:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">(<span class="kw">define</span><span class="fu"> </span>(<span class="kw">car</span> lst)
+  (lst <span class="dv">0</span>))
+
+(<span class="kw">define</span><span class="fu"> </span>(<span class="kw">cdr</span> lst)
+  (lst <span class="dv">1</span>))</code></pre>
+<p>Remember that the way that this works is that the list is being stored as a function so the only thing we can do is to call it!</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">(<span class="kw">car</span> (<span class="kw">cons</span> <span class="dv">1</span> &#39;(<span class="dv">2</span> <span class="dv">3</span>))) <span class="co">; 1</span>
+(<span class="kw">cdr</span> (<span class="kw">cons</span> <span class="dv">1</span> &#39;(<span class="dv">2</span> <span class="dv">3</span>))) <span class="co">; &#39;(2 3)</span></code></pre>
+<p>Cool! We just built lists out of “nothing”. If you want to be even more mind-bending. You can make the <code>dispatch</code> function anonymous:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">(<span class="kw">define</span><span class="fu"> </span>(<span class="kw">cons</span> x y)
+  (<span class="kw">lambda</span> (m)
+    (<span class="kw">cond</span> ((<span class="kw">=</span> m <span class="dv">0</span>) x)
+          ((<span class="kw">=</span> m <span class="dv">1</span>) y)
+          (<span class="kw">else</span> (error <span class="st">&quot;Argument not 0 or 1 -- CONS&quot;</span> m)))))</code></pre>
+<p>It works the same.</p>
+<p>If you view functions as little boxes that basically just contain their return values this makes sense. A function is like a box that, when given its argument barfs up the result. In fact, don’t think of a function as <em>doing</em> something, think of it as <em>being</em> something. If it is first class then you should be able to treat it this way in all respects. You can pass around these little boxes that have some value “in” them and the only way to get it out is to “call” it (or force, or… whatever). But, and we’re starting to tread into heavy functional land here, what if you weren’t so hung up on the idea of getting the value “out” of the box?</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">(<span class="kw">define</span><span class="fu"> </span>(box-it-up x) (<span class="kw">lambda</span> () x))</code></pre>
+<p>This puts a value, <code>x</code>, in a box. You can do whatever you want with the box. You can store it, you can pass it around etc. And, of course, you can open it up by doing this:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">((box-it-up <span class="dv">10</span>)) <span class="co">; 10</span></code></pre>
+<p>If that’s a bit hard to read, just remember that whatever is the first thing in a lisp list is called. Javascript would be:</p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="fu">box_it_up</span>(<span class="dv">10</span>)(); <span class="co">// 10</span></code></pre>
+<p>But let’s say that we don’t really care to open the box (we labeled our boxes really well). We just want to make sure that, whenever it is opened, that we obey special handling instructions. Let’s write “double this” on the box.</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">(<span class="kw">define</span><span class="fu"> </span>(double-this box)
+  (<span class="kw">lambda</span> () (* (box) <span class="dv">2</span>)))</code></pre>
+<p>Maybe I bent the rules a bit. I used a magic pen that when I wrote <code>double-this</code> on the box, it performed an old mover’s optimization trick. Instead of just having our original box I magically duplicated the old box with the twist that the new box now contains double whatever was in the old one ;) Got that? (Hey, metaphors are hard).</p>
+<p>Maybe you can see where I’m going here. I don’t want to have to make a new kind of <code>double-this</code> function every time I want to do something. How about I just give you the magic pen?</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">(<span class="kw">define</span><span class="fu"> </span>(magic-pen box func)
+  (<span class="kw">lambda</span> () (func (box))))</code></pre>
+<p>That means you can write <code>double-this</code> like so:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">(<span class="kw">define</span><span class="fu"> </span>(double-this box)
+  (magic-pen box (<span class="kw">lambda</span> (x) (* <span class="dv">2</span> x))))</code></pre>
+<p>Here’s how this all looks now:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">(<span class="kw">define</span><span class="fu"> twenty-box </span>(double-this (box-it-up <span class="dv">10</span>)))
+
+(twenty-box) <span class="co">; 20</span></code></pre>
+<p>cool! So this is how I’ve been thinking about Promises in javascript. We have a kind of box but, unlike functions, we really can’t open up for the simple reason that the value may not have happened yet! But it is no biggie because we can do whatever we like to the values inside inside the box!</p>
+<p>If you’ve got all that, then I’m happy because I’ve also kinda sorted tricked you into understanding monads. Did you notice how I was just able to handwave at the end and say, “yeah, but instead of functions the ‘box’ is some as-yet-unreceived network packet”? Monads are just the idea that you can compute all day long with these sorts of “unopened boxes”. Well not <em>just</em>, but the devil is in the details and that means that I’ll probably write another blog post about it.</p>
+</article>
+]]></description>
+    <pubDate>Sat, 06 Apr 2013 00:00:00 UT</pubDate>
+    <guid>http://sencjw.com/posts/2013-04-06-lists-out-of-lambdas-and-boxes-out-of-functions.html</guid>
+</item>
+<item>
+    <title>the dipert problem</title>
+    <link>http://sencjw.com/posts/2012-09-03-the-dipert-problem.html</link>
+    <description><![CDATA[<article>
+  <header>
+    <h1>the dipert problem</h1>
+    <p>
+      Posted on September  3, 2012
+      
+    </p>
+  </header>
+
+  <p>Recently, <a href="http://alan.dipert.org/">Alan Dipert</a> dropped a bomb on the twittersphere with his posing of <a href="https://twitter.com/alandipert/status/241575872937750529">this question</a> (warning there are spoilers in the replies):</p>
+<p>“pop quiz: solve <a href="http://www.4clojure.com/problem/107">http://www.4clojure.com/problem/107</a> point-free. answer must be a function value! #clojure”</p>
+<p>In case your office has banned 4clojure for being a huge distraction, I’ll post the problem here:</p>
+<pre class="sourceCode clojure"><code class="sourceCode clojure">(<span class="kw">=</span> <span class="dv">256</span> ((__ <span class="dv">2</span>) <span class="dv">16</span>),
+       ((__ <span class="dv">8</span>) <span class="dv">2</span>))
+
+(<span class="kw">=</span> [<span class="dv">1</span> <span class="dv">8</span> <span class="dv">27</span> <span class="dv">64</span>] (<span class="kw">map</span> (__ <span class="dv">3</span>) [<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span> <span class="dv">4</span>]))
+
+(<span class="kw">=</span> [<span class="dv">1</span> <span class="dv">2</span> <span class="dv">4</span> <span class="dv">8</span> <span class="dv">16</span>] (<span class="kw">map</span> #((__ %) <span class="dv">2</span>) [<span class="dv">0</span> <span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span> <span class="dv">4</span>]))</code></pre>
+<p>In problem 107, your challenge is to write a function that satisfies all of these (it could be dropped in place of the <code>__</code>s above). I will let you go take a crack at solving it. Because up next is some serious spoiler action.</p>
+<p>Got your solution? I came up with this:</p>
+<pre class="sourceCode clojure"><code class="sourceCode clojure">(<span class="kw">fn</span> [x] (<span class="kw">fn</span> [y] (<span class="kw">reduce</span> <span class="kw">*</span> (<span class="kw">repeat</span> x y))))</code></pre>
+<p>or (what I was really doing) in Haskell:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">f ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span>
+f x y <span class="fu">=</span> foldl1 (<span class="fu">*</span>) (replicate x y)</code></pre>
+<p>We are doing manual exponentiation: “make a list of <em>y</em>s that is <em>x</em> in length (e.g. <code>replicate 8 2 == [2, 2, 2, 2, 2, 2, 2, 2]</code>). Then you just run multiplication through the list:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">foldl1 (<span class="fu">*</span>) [<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">2</span>] <span class="fu">==</span> <span class="dv">2</span> <span class="fu">*</span> <span class="dv">2</span> <span class="fu">*</span> <span class="dv">2</span> <span class="fu">*</span> <span class="fu">...</span> <span class="dv">2</span> <span class="fu">==</span> <span class="dv">256</span></code></pre>
+<p>Now comes the “Dipert Problem.” He has told us that we have to rewrite the solution (or any solution) using so-called <em>point-free</em> style. I’m sure that there’s more to it, but essentially that means that <em>we are not allowed to mention any variables!</em> When I first heard about this style, it sounded impossible! The cool thing is that it <em>isn’t</em> and it leads to some massively simple code. Let’s try it out.</p>
+<p>I’m going to start with my solution above called <code>f</code> and then write some successive versions of it, each time, I’ll remove a variable and call it the “next” version: <code>f1</code>, <code>f2</code>, okay? Cool.</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">f, f1,<span class="ot"> f2 ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span>
+f x y <span class="fu">=</span> foldl1 (<span class="fu">*</span>) (replicate x y)</code></pre>
+<p>For the first transformation, we need to get rid of the <code>y</code> that’s hanging off the end of both sides of our equation. We’ll need to juggle the innards a bit because here is what the types look like so far:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">foldl1<span class="ot"> (*) ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Int</span>
+replicate x<span class="ot"> y ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> [a]</code></pre>
+<p><code>replicate</code> takes two arguments and then produces a list that the <code>foldl1 (*)</code> wants to consume. The trouble is, and what tripped me up a bunch, is that I can’t just do this:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">foldl1 (<span class="fu">*</span>) <span class="fu">.</span> replicate</code></pre>
+<p>Wah, wah (sad trombone). GHCI tells me:</p>
+<pre><code>Expected type: Int -&gt; [c0]
+  Actual type: Int -&gt; a0 -&gt; [a0]</code></pre>
+<p>Okay, that makes sense, for the fold and replicate to “line up” for composition, replicate has to take one argument then produce a list. The crux is that composition (the “dot” or period in the code) only works for single-argument-functons:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">(.) ::</span> (b <span class="ot">-&gt;</span> c) <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> c</code></pre>
+<p>This is a little pipeline, but reversed because that’s how mathematics does it. It says “the right-side function takes an <em>a</em> and gives a <em>b</em>, and the left-side function expects a <em>b</em> and gives a <em>c</em>; now you can stitch them together and have a function that <em>skips</em> the <em>b</em> and takes you right from <em>a</em> to <em>c</em>.” But we have a function that looks like:</p>
+<pre><code>(a -&gt; b -&gt; c)</code></pre>
+<p>on the right-hand side; it won’t work. how do we convert a <code>(a -&gt; b -&gt; c)</code> to a <code>(a -&gt; (b -&gt; c))</code>? This way:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">{-</span>
+<span class="co">f x y =  foldl1 (*) ((replicate x) y)</span>
+<span class="co">f x y = (foldl1 (*) . (replicate x)) y</span>
+<span class="co">-}</span>
+f1 x  <span class="fu">=</span>  foldl1 (<span class="fu">*</span>) <span class="fu">.</span> (replicate x)</code></pre>
+<p><em>Note:</em> the first two lines are commented in case you are cut-n-pasting along. The first line just puts parenthesis in where they really are in haskell. Each time you see a function of two arguments, it <em>is really</em> a function which takes one argument and returns a function that expects the second argument! This weird but remarkable fact of haskell is called <a href="http://www.haskell.org/haskellwiki/Currying">currying</a>.</p>
+<p>Now, on to the second line, we see that we have the right types! (I am cheating a bit on types, if you like, you can define <code>rep</code> which <em>just</em> uses <code>Int</code>s)</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">replicate<span class="ot"> x ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> [<span class="dt">Int</span>]  <span class="co">-- cheating: where &#39;x&#39; is a specific int</span>
+foldl1<span class="ot"> (*)  ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Int</span>
+
+foldl1 (<span class="fu">*</span>) <span class="fu">.</span> replicate<span class="ot"> x ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span></code></pre>
+<p>And that brings us to <code>f1</code>! We used grouping and composition to move the <code>y</code> outside the computation and then we dropped it from both sides.</p>
+<p>Next we’ll tackle the x:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">{-</span>
+<span class="co">f x =  (foldl1 (*) .) (replicate x)</span>
+<span class="co">f x = ((foldl1 (*) .) . replicate) x</span>
+<span class="co">-}</span>
+f2 <span class="fu">=</span>   (foldl1 (<span class="fu">*</span>) <span class="fu">.</span>) <span class="fu">.</span> replicate</code></pre>
+<p>It may look different, but the same thing is going on. We can group the composition with the fold without changing anything. This is just like doing:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="dv">3</span> <span class="fu">+</span> <span class="dv">4</span> <span class="fu">==</span> (<span class="dv">3</span> <span class="fu">+</span>) <span class="dv">4</span></code></pre>
+<p>Next we do that same trick again where we can now compose the inner functions because the types line up (again, I’m simplifying types a bit):</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">((foldl1 (<span class="fu">*</span>) <span class="fu">.</span>) <span class="fu">.</span>)<span class="ot"> ::</span> (a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> [c]) <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> c</code></pre>
+<p>it looks a bit hairy, but in our case, it is just what we want! If I fill in the actual types we’ll be using, it becomes clearer:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">((foldl1 (<span class="fu">*</span>) <span class="fu">.</span>) <span class="fu">.</span>)<span class="ot"> ::</span> (<span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> [<span class="dt">Int</span>]) <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span></code></pre>
+<p>Booyah! This contraption takes a <em>function</em> of two <code>Ints</code> that produces a list of ints, <code>[Int]</code>. Well, that’s just what <code>replicate</code> is! So if we then feed in replicate:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">(foldl1 (<span class="fu">*</span>) <span class="fu">.</span>) <span class="fu">.</span><span class="ot"> replicate ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span></code></pre>
+<p>And that’s it, we have a point-free function that takes two <code>Int</code>s and returns an <code>Int</code>. And so that’s our last, and final function:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">f2 <span class="fu">=</span> (foldl1 (<span class="fu">*</span>) <span class="fu">.</span>) <span class="fu">.</span> replicate</code></pre>
+<p>In general, and I don’t know a term for this, but the operation of successive function composition lets us compose higher and higher arity functions together. Here’s a dumb example using my little point-free <code>succ</code> function:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">g ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span>
+g <span class="fu">=</span> (<span class="fu">+</span><span class="dv">1</span>)
+(g <span class="fu">.</span>)<span class="ot">       ::</span> (a <span class="ot">-&gt;</span> <span class="dt">Int</span>) <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">Int</span>
+(g <span class="fu">.</span>) <span class="fu">.</span>)<span class="ot">    ::</span> (a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> <span class="dt">Int</span>) <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> <span class="dt">Int</span>
+(g <span class="fu">.</span>) <span class="fu">.</span>) <span class="fu">.</span>)<span class="ot"> ::</span> (a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> c <span class="ot">-&gt;</span> <span class="dt">Int</span>) <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> c <span class="ot">-&gt;</span> <span class="dt">Int</span></code></pre>
+<p>Clear pattern. I kinda think of this as saying something like “please give me a function which <em>eventually</em> promises to give me what I want.” The <em>eventually</em> part is essentially “after you’ve collected all the stuff you need.” It would be trivially satisfied by some function that ignores its args and returns a constant:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">(((g <span class="fu">.</span>) <span class="fu">.</span>) <span class="fu">.</span>) (\x y z <span class="ot">-&gt;</span> <span class="dv">1</span>) <span class="dv">4</span> <span class="dv">5</span> <span class="dv">6</span> <span class="fu">==</span> <span class="dv">2</span></code></pre>
+<p>Remembering that <code>g</code> just increments, the x y z are <em>totally ignored</em>. The function supplied to the multiply-composed <code>g</code> is like some kind of integer “pre-processor”; the <em>x</em>, <em>y</em> and <em>z</em> can be whatever you need to do to figure out how to give g an integer. Or at least that’s how I’m thinking of it.</p>
+<p>I had a lot of fun trying to figure this out!</p>
+</article>
+]]></description>
+    <pubDate>Mon, 03 Sep 2012 00:00:00 UT</pubDate>
+    <guid>http://sencjw.com/posts/2012-09-03-the-dipert-problem.html</guid>
+</item>
+
+    </channel> 
+</rss>
