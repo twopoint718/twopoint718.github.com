@@ -8,8 +8,94 @@
         <name>Chris Wilson</name>
         <email>chris@sencjw.com</email>
     </author>
-    <updated>2014-04-30T00:00:00Z</updated>
+    <updated>2014-05-19T00:00:00Z</updated>
     <entry>
+    <title>BayHac2014</title>
+    <link href="http://sencjw.com/posts/2014-05-19-bayhac-2014.html" />
+    <id>http://sencjw.com/posts/2014-05-19-bayhac-2014.html</id>
+    <published>2014-05-19T00:00:00Z</published>
+    <updated>2014-05-19T00:00:00Z</updated>
+    <summary type="html"><![CDATA[<article>
+  <header>
+    <h1>BayHac2014</h1>
+    <p>
+      Posted on May 19, 2014
+      
+    </p>
+  </header>
+
+  <p>I’m making my way back from <a href="http://www.haskell.org/haskellwiki/BayHac2014">BayHac 2014</a> as I write this but I wanted to put down a few thoughts while they’re still fresh.</p>
+<h2 id="friday">Friday</h2>
+<p>The hackathon started out with a talk on Pipes by Gabriel Gonzalez and then one on Free Monads by Dan Piponi. Both were excellent. And <em>excellent</em> here means that I think they were both the most lucid explanations of their respective topic that I’ve yet seen.</p>
+<p>Gabriel’s talk really helped to solidify my understanding of where pipes sit relative to <a href="http://hackage.haskell.org/package/conduit-1.0.15">conduit</a>, the other streaming-data library that I’m familiar with. The emphasis in the pipes talk was on the intuition behind the <a href="http://hackage.haskell.org/package/pipes-4.1.2/docs/Pipes.html#t:ListT"><code>ListT</code></a> type and the <a href="http://hackage.haskell.org/package/pipes-4.1.2/docs/Pipes.html#t:yield"><code>yield</code></a> and <a href="http://hackage.haskell.org/package/pipes-4.1.2/docs/Pipes.html#t:await"><code>await</code></a> functions.</p>
+<p>Dan Piponi spoke on free monads, <a href="https://docs.google.com/file/d/0B51SFgxqMDS-NDBOX0ZDdW52dEE/edit">Free, but not as in beer or speech</a> (<a href="https://plus.google.com/u/0/events/cu5t5s2g14t4fqmapft5bcatqeg">video</a>), by first starting with an algebraic structure called a <em>magma</em>, which is simply a single, closed binary operation on a set:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">class</span> <span class="dt">Magma</span> <span class="kw">where</span>
+<span class="ot">    o ::</span> a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> a</code></pre>
+<p>Next he suggested the idea of the “least special magma.” We want to capture the idea that we can do this binary operation, and that we have things that are part of the set (the <code>a</code> above). This leads us to a tree:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">FreeMagma</span> a <span class="fu">=</span> <span class="dt">Var</span> a
+                 <span class="fu">|</span> <span class="dt">Tree</span> (<span class="dt">FreeMagma</span> a) (<span class="dt">FreeMagma</span> a)
+<span class="kw">instance</span> <span class="dt">Magma</span> (<span class="dt">FreeMagma</span> a) <span class="kw">where</span>
+    o <span class="fu">=</span> <span class="dt">Tree</span></code></pre>
+<p>So the idea is that we’re combining two subexpressions (which could be just <code>Var a</code>, of course) and that’s it. The <em>structure</em> embodies the operation that we’re interested in. I don’t want to recapitulate the talk, but here’s one last slide. We can kinda crawl the structure that we’ve set up in order to evaluate the free magma:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">interpretMagma ::</span> <span class="dt">Magma</span> b <span class="ot">=&gt;</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> (<span class="dt">FreeMagma</span> a <span class="ot">-&gt;</span> b)
+interpretMagma f (<span class="dt">Var</span> a) <span class="fu">=</span> f a
+interpretMagma f (<span class="dt">Tree</span> a b) <span class="fu">=</span> interpretMagma f a <span class="ot">`o`</span> interpretMagma f b</code></pre>
+<p>Evaluating this thing is really just replacing the structure with elements of our choosing according to some rule.</p>
+<p>The talk goes on (and the plot thickens!) by moving into free monoids and then, free monads. It was a great introduction!</p>
+<h2 id="saturday">Saturday</h2>
+<p>Saturday I was able to attend part of the <a href="http://yesodweb.com/">Yesod</a> class (and I’m already a little familiar with Yesod), so the introduction was mostly things I’ve covered on my own. As an aside, I was <em>scheduled</em> for the Lens class and I say scheduled because BayHac was <em>very</em> popular and classes were randomly assigned based up on interest and space. Most classes were packed.</p>
+<p>The lens introduction by Shachaf Ben-Kiki was great. I’ve been reading up on these a lot lately so for me the ground had been prepared in just the right way for me to get a lot out of this. Shachaf moved at a brisk pace, whether through practice or sheer type-signature-fu, he hammered out types and definitions for things like lenses and traversals about as fast as I type prose. This class really lit a bulb for me about why the types work the way that they do for lenses. My very hand-wavey summary of this was that a lens is like having a writer monad “logging” the parts of some structure you’re interested in walking over. But rather than being interested in the <em>value</em> that the writer produces it’s the <em>log</em> that you want.</p>
+<p><em>Caution, the following is based on my own emerging understanding of Lenses. Please pardon any errors (and I welcome corrections).</em></p>
+<p>What started to make sense for me was the connection between <a href="https://hackage.haskell.org/package/lens-4.1.2/docs/Control-Lens-Setter.html#v:over">over</a>, <a href="http://hackage.haskell.org/package/base-4.7.0.0/docs/Data-Traversable.html#v:traverse">traverse</a>, and <a href="http://hackage.haskell.org/package/lens-4.1.2.1/docs/Control-Lens-Lens.html#t:Lens">Lens</a>.</p>
+<p>First, looking at traverse, which has the type:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">traverse
+<span class="ot">  ::</span> (<span class="dt">Traversable</span> t, <span class="dt">Applicative</span> f) <span class="ot">=&gt;</span> (a <span class="ot">-&gt;</span> f b) <span class="ot">-&gt;</span> t a <span class="ot">-&gt;</span> f (t b)</code></pre>
+<p>you can think of it as a sort of generalized <a href="http://hackage.haskell.org/package/base-4.7.0.0/docs/Data-List.html#v:map">map</a> (I do). We know the <code>f</code> above is a Functor because:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">class</span> <span class="dt">Functor</span> f <span class="ot">=&gt;</span> <span class="dt">Applicative</span> f <span class="kw">where</span> <span class="fu">...</span></code></pre>
+<p>So, picking a simple Functor, say the <a href="http://hackage.haskell.org/package/transformers-0.4.1.0/docs/Data-Functor-Identity.html#t:Identity">Identity</a> Functor, you can write something like map:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">map&#39; ::</span> <span class="dt">Traversable</span> t <span class="ot">=&gt;</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> t a <span class="ot">-&gt;</span> t b
+map&#39; f <span class="fu">=</span> runIdentity <span class="fu">.</span> traverse (<span class="dt">Identity</span> <span class="fu">.</span> f)</code></pre>
+<p>notice how we’re sort of “packaging” up the result of the function in a dummy Functor (<code>runIdentity . Identity == id</code>), which we then immediately discard. This is exactly the sort of sleight of hand that we need for Lens:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">type</span> <span class="dt">Lens</span> s t a b <span class="fu">=</span> forall f<span class="fu">.</span> <span class="dt">Functor</span> f <span class="ot">=&gt;</span> (a <span class="ot">-&gt;</span> f b) <span class="ot">-&gt;</span> s <span class="ot">-&gt;</span> f t</code></pre>
+<p>Notice how the <a href="https://hackage.haskell.org/package/lens-4.1.2/docs/Control-Lens-Getter.html#v:view">view</a> function does something really similar:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">view ::</span> <span class="dt">MonadReader</span> s m <span class="ot">=&gt;</span> <span class="dt">Getting</span> a s a <span class="ot">-&gt;</span> m a
+<span class="co">-- re-written with definition of Getting</span>
+<span class="ot">view ::</span> <span class="dt">MonadReader</span> s m <span class="ot">=&gt;</span> (a <span class="ot">-&gt;</span> <span class="dt">Const</span> a a) <span class="ot">-&gt;</span> s <span class="ot">-&gt;</span> <span class="dt">Const</span> a s <span class="ot">-&gt;</span> m a</code></pre>
+<p>Const is similar to <code>Identity</code> in that it has a “weird” definition:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="dt">Functor</span> (<span class="dt">Const</span> m) <span class="kw">where</span>
+    fmap _ (<span class="dt">Const</span> v) <span class="fu">=</span> <span class="dt">Const</span> v    <span class="co">-- the function doesn&#39;t matter!</span></code></pre>
+<p>putting that all together (and I’m still a bit fuzzy on how the types work out on these) gives you something that takes a Lens of some structure but then <em>ignores</em> that structure (the <code>s</code> in the <code>Const a s</code>). So you’re getting your structure with the value picked out, but then ignoring the structure (and leaving just the value you’re interested in).</p>
+<p>That’s really handwavey, but here’s an example:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">Person</span> <span class="fu">=</span> <span class="dt">Person</span> {<span class="ot"> fn ::</span> <span class="dt">String</span> ,<span class="ot"> ln ::</span> <span class="dt">String</span> }
+<span class="co">-- e.g. fn (Person &quot;Chris&quot; &quot;Wilson&quot;) == &quot;Chris&quot;)</span></code></pre>
+<p>Now I can make a <code>Lens</code> of <code>fn</code> by specifying my own getter and setter functions:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">fnLens <span class="fu">=</span> lens fn (\(<span class="dt">Person</span> a b) v <span class="ot">-&gt;</span> <span class="dt">Person</span> v b)</code></pre>
+<p>Now I can use that to access the <code>Person</code> structure:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">view fnLens (<span class="dt">Person</span> <span class="st">&quot;Chris&quot;</span> <span class="st">&quot;Wilson&quot;</span>)
+<span class="co">-- &quot;Chris&quot;</span></code></pre>
+<p>And the type would be something like:</p>
+<pre><code>view   :: (a -&gt; Const a a)                -- as above
+       -&gt; s
+       -&gt; Const a s
+       -&gt; m a
+
+fnLens :: (String -&gt; Const String String) -- subbing in types
+       -&gt; Person
+       -&gt; Const String Person
+
+view fnLens :: MonadReader Person m =&gt; m String</code></pre>
+<p>The above type signature is a bit wonky, but I think it captures what’s happening as the types unify. So it all boils down to something that extracts a <code>String</code> from a <code>Person</code>. But the intuition that is starting to grow for me is that Lenses let you use a carefully-chosen (i.e. <code>Const</code>) <code>Functor</code> to “smuggle” a value out of a bigger structure.</p>
+<h2 id="sunday">Sunday</h2>
+<p>I spent a lot of time on Sunday working on Joe Nelson’s <a href="https://github.com/begriffs/haskell-vim-now">haskell-vim-now</a> one-line Haskell Vim installer. Lots of people were excited about the prospect of having an easy-to-install Vim mode. I think that this has made a lot of progress. If you like Vim and want to do Haskell development, go install it now. If you want to just install it here, just run this:</p>
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">curl</span> -o - https://raw.githubusercontent.com/begriffs/haskell-vim-now/master/install.sh <span class="kw">|</span> <span class="kw">sh</span></code></pre>
+<p>But please see the <a href="https://github.com/begriffs/haskell-vim-now/blob/master/README.md">README</a> for keybindings and general tips on use. Also, if there is anything that you’d like to see included or revised, you are <a href="https://github.com/begriffs/haskell-vim-now/issues">invited to submit an issue</a>.</p>
+<p>I also spent some time talking with the <a href="https://snowdrift.coop">Snowdrift.coop</a> developers. This is a funding platform that seeks to crowdfund ongoing Free/Libre/Open Source projects. They have a nice <a href="https://snowdrift.coop/p/snowdrift/w/intro">intro</a>. The Haskell angle here is that this is a Yesod app: source <a href="https://github.com/dlthomas/snowdrift">on Github</a> and <a href="https://gitorious.org/snowdrift/snowdrift/source/6b587c9c176aa24917c7403dbadd3778e17d08b4:">on Gitorious</a>.</p>
+<h2 id="summary">Summary</h2>
+<p>BayHac was a great experince! I got to meet with a bunch of people that I had only been following online so far. And I think it really fired me up to write more production Haskell. I’m even looking for ways to integrate it into Bendyworks’ development.</p>
+</article>
+]]></summary>
+</entry>
+<entry>
     <title>Lenses 101 (for me)</title>
     <link href="http://sencjw.com/posts/2014-04-30-lenses-101.html" />
     <id>http://sencjw.com/posts/2014-04-30-lenses-101.html</id>
@@ -422,96 +508,6 @@ chris<span class="fu">^.</span>phone<span class="fu">^.</span><span class="kw">t
 (twenty-box) <span class="co">; 20</span></code></pre>
 <p>cool! So this is how I’ve been thinking about Promises in javascript. We have a kind of box but, unlike functions, we really can’t open up for the simple reason that the value may not have happened yet! But it is no biggie because we can do whatever we like to the values inside inside the box!</p>
 <p>If you’ve got all that, then I’m happy because I’ve also kinda sorted tricked you into understanding monads. Did you notice how I was just able to handwave at the end and say, “yeah, but instead of functions the ‘box’ is some as-yet-unreceived network packet”? Monads are just the idea that you can compute all day long with these sorts of “unopened boxes”. Well not <em>just</em>, but the devil is in the details and that means that I’ll probably write another blog post about it.</p>
-</article>
-]]></summary>
-</entry>
-<entry>
-    <title>the dipert problem</title>
-    <link href="http://sencjw.com/posts/2012-09-03-the-dipert-problem.html" />
-    <id>http://sencjw.com/posts/2012-09-03-the-dipert-problem.html</id>
-    <published>2012-09-03T00:00:00Z</published>
-    <updated>2012-09-03T00:00:00Z</updated>
-    <summary type="html"><![CDATA[<article>
-  <header>
-    <h1>the dipert problem</h1>
-    <p>
-      Posted on September  3, 2012
-      
-    </p>
-  </header>
-
-  <p>Recently, <a href="http://alan.dipert.org/">Alan Dipert</a> dropped a bomb on the twittersphere with his posing of <a href="https://twitter.com/alandipert/status/241575872937750529">this question</a> (warning there are spoilers in the replies):</p>
-<p>“pop quiz: solve <a href="http://www.4clojure.com/problem/107">http://www.4clojure.com/problem/107</a> point-free. answer must be a function value! #clojure”</p>
-<p>In case your office has banned 4clojure for being a huge distraction, I’ll post the problem here:</p>
-<pre class="sourceCode clojure"><code class="sourceCode clojure">(<span class="kw">=</span> <span class="dv">256</span> ((__ <span class="dv">2</span>) <span class="dv">16</span>),
-       ((__ <span class="dv">8</span>) <span class="dv">2</span>))
-
-(<span class="kw">=</span> [<span class="dv">1</span> <span class="dv">8</span> <span class="dv">27</span> <span class="dv">64</span>] (<span class="kw">map</span> (__ <span class="dv">3</span>) [<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span> <span class="dv">4</span>]))
-
-(<span class="kw">=</span> [<span class="dv">1</span> <span class="dv">2</span> <span class="dv">4</span> <span class="dv">8</span> <span class="dv">16</span>] (<span class="kw">map</span> #((__ %) <span class="dv">2</span>) [<span class="dv">0</span> <span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span> <span class="dv">4</span>]))</code></pre>
-<p>In problem 107, your challenge is to write a function that satisfies all of these (it could be dropped in place of the <code>__</code>s above). I will let you go take a crack at solving it. Because up next is some serious spoiler action.</p>
-<p>Got your solution? I came up with this:</p>
-<pre class="sourceCode clojure"><code class="sourceCode clojure">(<span class="kw">fn</span> [x] (<span class="kw">fn</span> [y] (<span class="kw">reduce</span> <span class="kw">*</span> (<span class="kw">repeat</span> x y))))</code></pre>
-<p>or (what I was really doing) in Haskell:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">f ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span>
-f x y <span class="fu">=</span> foldl1 (<span class="fu">*</span>) (replicate x y)</code></pre>
-<p>We are doing manual exponentiation: “make a list of <em>y</em>s that is <em>x</em> in length (e.g. <code>replicate 8 2 == [2, 2, 2, 2, 2, 2, 2, 2]</code>). Then you just run multiplication through the list:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell">foldl1 (<span class="fu">*</span>) [<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">2</span>] <span class="fu">==</span> <span class="dv">2</span> <span class="fu">*</span> <span class="dv">2</span> <span class="fu">*</span> <span class="dv">2</span> <span class="fu">*</span> <span class="fu">...</span> <span class="dv">2</span> <span class="fu">==</span> <span class="dv">256</span></code></pre>
-<p>Now comes the “Dipert Problem.” He has told us that we have to rewrite the solution (or any solution) using so-called <em>point-free</em> style. I’m sure that there’s more to it, but essentially that means that <em>we are not allowed to mention any variables!</em> When I first heard about this style, it sounded impossible! The cool thing is that it <em>isn’t</em> and it leads to some massively simple code. Let’s try it out.</p>
-<p>I’m going to start with my solution above called <code>f</code> and then write some successive versions of it, each time, I’ll remove a variable and call it the “next” version: <code>f1</code>, <code>f2</code>, okay? Cool.</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell">f, f1,<span class="ot"> f2 ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span>
-f x y <span class="fu">=</span> foldl1 (<span class="fu">*</span>) (replicate x y)</code></pre>
-<p>For the first transformation, we need to get rid of the <code>y</code> that’s hanging off the end of both sides of our equation. We’ll need to juggle the innards a bit because here is what the types look like so far:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell">foldl1<span class="ot"> (*) ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Int</span>
-replicate x<span class="ot"> y ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> [a]</code></pre>
-<p><code>replicate</code> takes two arguments and then produces a list that the <code>foldl1 (*)</code> wants to consume. The trouble is, and what tripped me up a bunch, is that I can’t just do this:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell">foldl1 (<span class="fu">*</span>) <span class="fu">.</span> replicate</code></pre>
-<p>Wah, wah (sad trombone). GHCI tells me:</p>
-<pre><code>Expected type: Int -&gt; [c0]
-  Actual type: Int -&gt; a0 -&gt; [a0]</code></pre>
-<p>Okay, that makes sense, for the fold and replicate to “line up” for composition, replicate has to take one argument then produce a list. The crux is that composition (the “dot” or period in the code) only works for single-argument-functons:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">(.) ::</span> (b <span class="ot">-&gt;</span> c) <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> c</code></pre>
-<p>This is a little pipeline, but reversed because that’s how mathematics does it. It says “the right-side function takes an <em>a</em> and gives a <em>b</em>, and the left-side function expects a <em>b</em> and gives a <em>c</em>; now you can stitch them together and have a function that <em>skips</em> the <em>b</em> and takes you right from <em>a</em> to <em>c</em>.” But we have a function that looks like:</p>
-<pre><code>(a -&gt; b -&gt; c)</code></pre>
-<p>on the right-hand side; it won’t work. how do we convert a <code>(a -&gt; b -&gt; c)</code> to a <code>(a -&gt; (b -&gt; c))</code>? This way:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">{-</span>
-<span class="co">f x y =  foldl1 (*) ((replicate x) y)</span>
-<span class="co">f x y = (foldl1 (*) . (replicate x)) y</span>
-<span class="co">-}</span>
-f1 x  <span class="fu">=</span>  foldl1 (<span class="fu">*</span>) <span class="fu">.</span> (replicate x)</code></pre>
-<p><em>Note:</em> the first two lines are commented in case you are cut-n-pasting along. The first line just puts parenthesis in where they really are in haskell. Each time you see a function of two arguments, it <em>is really</em> a function which takes one argument and returns a function that expects the second argument! This weird but remarkable fact of haskell is called <a href="http://www.haskell.org/haskellwiki/Currying">currying</a>.</p>
-<p>Now, on to the second line, we see that we have the right types! (I am cheating a bit on types, if you like, you can define <code>rep</code> which <em>just</em> uses <code>Int</code>s)</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell">replicate<span class="ot"> x ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> [<span class="dt">Int</span>]  <span class="co">-- cheating: where &#39;x&#39; is a specific int</span>
-foldl1<span class="ot"> (*)  ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Int</span>
-
-foldl1 (<span class="fu">*</span>) <span class="fu">.</span> replicate<span class="ot"> x ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span></code></pre>
-<p>And that brings us to <code>f1</code>! We used grouping and composition to move the <code>y</code> outside the computation and then we dropped it from both sides.</p>
-<p>Next we’ll tackle the x:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">{-</span>
-<span class="co">f x =  (foldl1 (*) .) (replicate x)</span>
-<span class="co">f x = ((foldl1 (*) .) . replicate) x</span>
-<span class="co">-}</span>
-f2 <span class="fu">=</span>   (foldl1 (<span class="fu">*</span>) <span class="fu">.</span>) <span class="fu">.</span> replicate</code></pre>
-<p>It may look different, but the same thing is going on. We can group the composition with the fold without changing anything. This is just like doing:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="dv">3</span> <span class="fu">+</span> <span class="dv">4</span> <span class="fu">==</span> (<span class="dv">3</span> <span class="fu">+</span>) <span class="dv">4</span></code></pre>
-<p>Next we do that same trick again where we can now compose the inner functions because the types line up (again, I’m simplifying types a bit):</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell">((foldl1 (<span class="fu">*</span>) <span class="fu">.</span>) <span class="fu">.</span>)<span class="ot"> ::</span> (a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> [c]) <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> c</code></pre>
-<p>it looks a bit hairy, but in our case, it is just what we want! If I fill in the actual types we’ll be using, it becomes clearer:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell">((foldl1 (<span class="fu">*</span>) <span class="fu">.</span>) <span class="fu">.</span>)<span class="ot"> ::</span> (<span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> [<span class="dt">Int</span>]) <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span></code></pre>
-<p>Booyah! This contraption takes a <em>function</em> of two <code>Ints</code> that produces a list of ints, <code>[Int]</code>. Well, that’s just what <code>replicate</code> is! So if we then feed in replicate:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell">(foldl1 (<span class="fu">*</span>) <span class="fu">.</span>) <span class="fu">.</span><span class="ot"> replicate ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span></code></pre>
-<p>And that’s it, we have a point-free function that takes two <code>Int</code>s and returns an <code>Int</code>. And so that’s our last, and final function:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell">f2 <span class="fu">=</span> (foldl1 (<span class="fu">*</span>) <span class="fu">.</span>) <span class="fu">.</span> replicate</code></pre>
-<p>In general, and I don’t know a term for this, but the operation of successive function composition lets us compose higher and higher arity functions together. Here’s a dumb example using my little point-free <code>succ</code> function:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">g ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span>
-g <span class="fu">=</span> (<span class="fu">+</span><span class="dv">1</span>)
-(g <span class="fu">.</span>)<span class="ot">       ::</span> (a <span class="ot">-&gt;</span> <span class="dt">Int</span>) <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">Int</span>
-(g <span class="fu">.</span>) <span class="fu">.</span>)<span class="ot">    ::</span> (a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> <span class="dt">Int</span>) <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> <span class="dt">Int</span>
-(g <span class="fu">.</span>) <span class="fu">.</span>) <span class="fu">.</span>)<span class="ot"> ::</span> (a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> c <span class="ot">-&gt;</span> <span class="dt">Int</span>) <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> c <span class="ot">-&gt;</span> <span class="dt">Int</span></code></pre>
-<p>Clear pattern. I kinda think of this as saying something like “please give me a function which <em>eventually</em> promises to give me what I want.” The <em>eventually</em> part is essentially “after you’ve collected all the stuff you need.” It would be trivially satisfied by some function that ignores its args and returns a constant:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell">(((g <span class="fu">.</span>) <span class="fu">.</span>) <span class="fu">.</span>) (\x y z <span class="ot">-&gt;</span> <span class="dv">1</span>) <span class="dv">4</span> <span class="dv">5</span> <span class="dv">6</span> <span class="fu">==</span> <span class="dv">2</span></code></pre>
-<p>Remembering that <code>g</code> just increments, the x y z are <em>totally ignored</em>. The function supplied to the multiply-composed <code>g</code> is like some kind of integer “pre-processor”; the <em>x</em>, <em>y</em> and <em>z</em> can be whatever you need to do to figure out how to give g an integer. Or at least that’s how I’m thinking of it.</p>
-<p>I had a lot of fun trying to figure this out!</p>
 </article>
 ]]></summary>
 </entry>
