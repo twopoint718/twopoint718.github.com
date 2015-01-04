@@ -6,8 +6,64 @@
         <description><![CDATA[This feed is for blog entries]]></description>
         <atom:link href="http://sencjw.com/feed.rss" rel="self"
                    type="application/rss+xml" />
-        <lastBuildDate>Sun, 17 Aug 2014 00:00:00 UT</lastBuildDate>
+        <lastBuildDate>Sat, 03 Jan 2015 00:00:00 UT</lastBuildDate>
         <item>
+    <title>Haskell Meetup!</title>
+    <link>http://sencjw.com/posts/2015-01-03-meetup.html</link>
+    <description><![CDATA[<article>
+  <header>
+    <h1>Haskell Meetup!</h1>
+    <p>
+      Posted on January  3, 2015
+      
+    </p>
+  </header>
+
+  <div class="figure">
+<img src="../images/mad_haskell.svg" alt="Haskell logo" /><p class="caption">Haskell logo</p>
+</div>
+<p>We’re doing a <a href="">Haskell Meetup</a> in Madison! I’m really eager to see what comes out of this. I remember that I first heard about Bendyworks because of a Clojure meetup. Getting a bunch of like-minded people together will be fun. Besides, maybe I can find some more people to blab to about free monads.</p>
+</article>
+]]></description>
+    <pubDate>Sat, 03 Jan 2015 00:00:00 UT</pubDate>
+    <guid>http://sencjw.com/posts/2015-01-03-meetup.html</guid>
+</item>
+<item>
+    <title>Getting to write Haskell at work</title>
+    <link>http://sencjw.com/posts/2014-12-22-haskell-at-work.html</link>
+    <description><![CDATA[<article>
+  <header>
+    <h1>Getting to write Haskell at work</h1>
+    <p>
+      Posted on December 22, 2014
+      
+    </p>
+  </header>
+
+  <p>Jon and I recently worked on a medium-sized Haskell project: <a href="https://github.com/bendyworks/api-server">https://github.com/bendyworks/api-server</a>. It has been immensely gratifying to be able to work on this sort of thing at work. It also makes me realize the current dismal state of things. I tend to not try to wade into “language wars” or say things like “my way of doing things is better…” But after having worked on this project, I’m a little bit sad to work on other things. Some of the things that I noticed:</p>
+<ul>
+<li>Getting something to build and run took more up-front effort</li>
+<li>…but that was probably a good thing</li>
+<li>Jumping back into the project was easier</li>
+<li>Finding the bugs that did occur was straightforward</li>
+<li>We wrote fewer tests than similar Ruby project</li>
+<li>Tests were <em>much</em> more effective (e.g. simply round-tripping something through the database flushed out a bunch of errors)</li>
+</ul>
+<p>What I think gets lost in these sorts of commentaries or comparisons and what I don’t want to get lost here is that there’s a <em>clear-win</em> sense to it that people tend to miss. That is, I think that these sorts of posts <a href="http://en.wiktionary.org/wiki/bury_the_lede">bury the lede</a> by not starting with: <em>“Of course Haskell is the way to go, but here are some drawbacks…”</em></p>
+<p>The above list omits things like the fact that even though it took longer to get something up and running, what that <em>means</em> is that if we ignored all the help that Haskell was providing us, we’d only succeed in getting something <em>incorrect</em> up and running sooner. Is it better to get the wrong answer faster? I don’t think so. But I admit that that position may be up to people’s personal taste. This experience has left me grappling with a sinking feeling, that the current development economy that I’m a part of: startups writing web apps, large companies wanting new features added to existing code, and other similar uses cases simply <em>does not or cannot support quality</em>. I’m suspect that using languages and techniques that squash most bugs and enable code to be reasonably bug-free are just too expensive. Quality isn’t a priority. We as an industry have chosen “give me the wrong answer, as long as it is quick.”</p>
+<p>Don’t get me wrong, that’s a reasonable choice to make and it’s how engineering works. We have to build what the market will support. “Fast, good, and cheap; pick 2.” We seem to have pretty much given up on <em>good</em> and are just playing with variations on fast and cheap.</p>
+<p>If that sounds bleak, I don’t mean it to. I <em>want</em> to inject quality as an option, but I realize that it’s going to have to happen by going through the system not around it. There’s no royal road to software nirvana. Perhaps we can frame the problem in a way that will make companies take notice. Michael Snoyman put it <a href="http://www.yesodweb.com/blog/2012/08/webinar-oreilly">this way</a>:</p>
+<blockquote>
+<p>Minimizing bugs is a feature that you can sell people on. If I’m comparing product A and product B, and I have some reason to believe product B will have less bugs, I’m very likely to buy it. It can win out over other aspects of the product, such as cost (do you really want to pay for bugs?), ease-of-use (it sure was easy to generate that invalid output), or extra capabilities (hey look, this product can do 50 things badly).</p>
+</blockquote>
+<p>Maybe that’s the tagline for developing code with Haskell: “do you really want to pay for bugs?” If desirable features have a positive cost (e.g. “how much would you pay for software that could do X?”) would bugs have a negative cost? (e.g. “how much would you pay for software that didn’t do X?”). It opens the possibility of getting hard numbers on the “negative feature cost” of bugs, (e.g. “I would pay an extra 10% if my software never did X”). And <em>that</em> in turn opens some headroom for using something like Haskell.</p>
+<p>Put another way, I think that bugs are often <em>undervalued</em>. Bugs hurt “delivered value” a lot more than seems to be widely acknowledged. Sure it can be nice to be the first one to market, or have the biggest mindshare, but all that will fade fast if the fail whale persists.</p>
+</article>
+]]></description>
+    <pubDate>Mon, 22 Dec 2014 00:00:00 UT</pubDate>
+    <guid>http://sencjw.com/posts/2014-12-22-haskell-at-work.html</guid>
+</item>
+<item>
     <title>Writing code that I'm not smart enough to write</title>
     <link>http://sencjw.com/posts/2014-08-17-not-smart-enough.html</link>
     <description><![CDATA[<article>
@@ -386,66 +442,6 @@ chris<span class="fu">^.</span>phone<span class="fu">^.</span><span class="kw">t
 ]]></description>
     <pubDate>Sat, 14 Sep 2013 00:00:00 UT</pubDate>
     <guid>http://sencjw.com/posts/2013-09-14-named-parameters-in-haskell.html</guid>
-</item>
-<item>
-    <title>code budget</title>
-    <link>http://sencjw.com/posts/2013-08-20-code-budget.html</link>
-    <description><![CDATA[<article>
-  <header>
-    <h1>code budget</h1>
-    <p>
-      Posted on August 20, 2013
-      
-    </p>
-  </header>
-
-  <p>At almost the moment a new project begins, we start the ritual of estimation. Guess how long this will take. Guess how much this will cost. How about if we change that feature to this feature? The goal of all this prognostication is to try to fit a potentially infinite product within the finite means we have available to us in terms of money, people, and (sometimes overlooked) political will.</p>
-<p>These are all precious and limited resources that we must <em>spend</em>; we trade what we can afford for the software we want. Grouped among these precious and limited resources, I think we must include <em>lines of code</em>. As <a href="http://www.cs.utexas.edu/~EWD/transcriptions/EWD10xx/EWD1036.html">Dijkstra</a> noted, that lines of code added are being recorded in the <em>wrong side of the ledger</em>. This means that as code is added to a codebase the difficulty of making changes or future additions keeps going up. This has a self-limiting effect in the same way that a dollar budget is self-limiting: when you exceed the budget you should examine the goals and outcomes of the project.</p>
-<p>That’s my proposal. At the start of a project estimate the quantity of code needed to solve the business problem. This is hard in the same ways that other estimation is hard, but with time and practice, should be doable. When this budget is exceeded it should trigger some tough questions about the state that the project is in. Why have we used more lines of code than we thought? Could this be refactored? A benefit of the code budget is that it will force the team to examine the codebase at exactly the time that projects tend to be in maximum crunch mode. This hard check is a good thing that keeps everyone grounded in quality when all other external signals are screaming everything but.</p>
-</article>
-]]></description>
-    <pubDate>Tue, 20 Aug 2013 00:00:00 UT</pubDate>
-    <guid>http://sencjw.com/posts/2013-08-20-code-budget.html</guid>
-</item>
-<item>
-    <title>nand2tetris: low-level love</title>
-    <link>http://sencjw.com/posts/2013-08-07-nand2tetris--low-level-love.html</link>
-    <description><![CDATA[<article>
-  <header>
-    <h1>nand2tetris: low-level love</h1>
-    <p>
-      Posted on August  7, 2013
-      
-    </p>
-  </header>
-
-  <p>I’ve been working through <em>The Elements of Computing Systems</em>, or as it is sometimes called <a href="http://nand2tetris.org">nand2tetris</a>. This is a fun course where you start out by being given (say: from God) the humble nand gate (file photo below):</p>
-<p><img src="http://upload.wikimedia.org/wikipedia/commons/e/e6/NAND_ANSI_Labelled.svg"
-     width="300"
-     alt="Schematic of a nand gate"></p>
-<p>And here’s a nude photo (showing how one would be implemented):</p>
-<p><img src="http://upload.wikimedia.org/wikipedia/commons/d/d4/TTL_npn_nand.svg"
-     width="300"
-     alt="Electrical schematic of a nand gate"></p>
-<p>But as far as nand2tetris is concerned, you can just assume that the above is a fact of life. You have a nand tree. So what do you do? well you start on an adventure where you define <em>Not</em> then <em>And</em> then <em>Nor</em> and, well you get the idea. Soon you find that you have a working <a href="https://en.wikipedia.org/wiki/Arithmetic_logic_unit">ALU</a>.</p>
-<p>I’m currently on the cusp of making the hardware to software jump. All along I’ve been having a blast wiring up these little beasties in <a href="https://en.wikipedia.org/wiki/Hardware_description_language">HDL</a></p>
-<p>The course finishes up with implementing cool software in a HLL language. I haven’t peeped this far ahead but it is supposed to be akin to Java. Oh yeah, by the time you get to this point you’ll have implemented the compiler for this language, the VM that it runs in, the raw machine code the VM is written in, the CPU that runs that machine code, and so on. It goes all the way back to that humble nand gate that you started out with.</p>
-<p>I hope to post some updates as I progress through the course, <del>but the quickest way is to check my commits over on my n2t github project.</del></p>
-<p><em>Edit: sorry to say this, but I’ve taken down that repo since it conflicts with the wishes of the authors of the course.</em></p>
-<p>As a slight digression, but surely belonging here, this has been something of a summer-o-hardware for me. I started reading <a href="http://www.charlespetzold.com/code/">CODE</a> by Charles Petzold a while back and the bottom-up description of computing that he laid out was intoxicating. I had to learn more and get my hands dirty with bits and bytes. And that’s when my hardware voyage began.</p>
-<p>In keeping with this theme, here’s a short reading list if you want to blast your brain with computing. In fact, I bet that if you were to go through all these books it’d be like getting a degree in computer science – with a minor in cool-nerd history:</p>
-<ul>
-<li><a href="http://www.amazon.com/dp/1400096235">The Information</a> by James Gleick</li>
-<li><a href="http://www.amazon.com/Elements-Computing-Systems-Building-Principles/dp/0262640686">The Elements of Computing Systems</a> by Nisan and Schocken</li>
-<li><a href="http://www.charlespetzold.com/code/">CODE</a> by Charles Petzold</li>
-<li><a href="http://computationbook.com">Understanding Computation</a> by Tom Stuart</li>
-<li><a href="http://www.amazon.com/Gödel-Escher-Bach-Eternal-Golden/dp/0465026567">Gödel, Escher, Bach</a> by Douglas R. Hofstadter</li>
-</ul>
-<p>There you have it. Go off and hack hardware!</p>
-</article>
-]]></description>
-    <pubDate>Wed, 07 Aug 2013 00:00:00 UT</pubDate>
-    <guid>http://sencjw.com/posts/2013-08-07-nand2tetris--low-level-love.html</guid>
 </item>
 
     </channel> 
