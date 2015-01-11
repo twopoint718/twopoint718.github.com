@@ -6,8 +6,34 @@
         <description><![CDATA[This feed is for blog entries]]></description>
         <atom:link href="http://sencjw.com/feed.rss" rel="self"
                    type="application/rss+xml" />
-        <lastBuildDate>Sat, 03 Jan 2015 00:00:00 UT</lastBuildDate>
+        <lastBuildDate>Thu, 08 Jan 2015 00:00:00 UT</lastBuildDate>
         <item>
+    <title>The Quick Hack v. Developing Software</title>
+    <link>http://sencjw.com/posts/2015-01-08-the-quick-hack.html</link>
+    <description><![CDATA[<article>
+  <header>
+    <h1>The Quick Hack v. Developing Software</h1>
+    <p>
+      Posted on January  8, 2015
+      
+    </p>
+  </header>
+
+  <p>I find that I operate in one of two <em>modes</em> when I’m writing software. I’m either approaching a project as <em>a quick hack</em> or as <em>developing software</em>. As much as anything else, this affects how I approach the project and what kinds of results that I get.</p>
+<p>When I’m operating under the auspices of the quick hack, everything is moving toward and subordinate to the goal. The end product of the quick hack is everything. I approach the actual hacking in a fit of pique, it’s <em>annoying</em> that this thing isn’t done yet. I always take the way that’s most expedient and I’m always looking for a shortcut or quick fix.</p>
+<p>When I set out to <em>develop software</em> my mindset is different. Here I’m nurturing a seed of an idea. I’m taking small pieces and building connections between them. I have the sense that I’m making something new, or at least I’m making something that’s <em>mine</em> – I feel ownership. I also assume that the thing that I’m building has to last.</p>
+<p>The natural habitat of a quick hack is a framework. When I’m confronted with something that doesn’t fit, I look for that next StackOverflow answer that’ll tell me how to shoehorn it in among the Tetris pieces that I already have. The framework is not malleable, I must square-off my round peg.</p>
+<p>Libraries are what support developing software. Properly in charge, I choose a subordinate library and apply its talents appropriately. There is no hint of having to make my design fit within the strictures of someone else’s plan. I have the skeleton, I merely need the flesh. If I find that a library no longer suits my needs, it is easily removed. Well-scoped libraries tend to match one another much more closely than frameworks do. The problem that the library solves, the abstraction that it grants, tends to be more universal than a framework. Two HTTP client libraries will tend to expose those actions that HTTP supports. With a framework, I must first accept its world-view before I can start using it.</p>
+<p>As I’ve grown as a software developer, I’ve come to believe that whenever possible I should use libraries over frameworks. This has been said [many][1] [times][2] [before][3], but now I’m <em>getting there</em> via my own experience. I’m beginning to see that the advantages of frameworks can be matched by a powerful language combined with a little sense about the high-level architecture that the application demands. Over time, I’ve developed my own palette of designs and code to accomplish most tasks. I can act as a [linker][4], assembling only those functions that are needed to accomplish the task at hand.</p>
+<p>1: http://tom.lokhorst.eu/2010/09/why-libraries-are-better-than-frameworks 2: http://discuss.joelonsoftware.com/default.asp?joel.3.219431.12&amp; 3: http://blog.orderharmony.com/2011/07/libraries-vs-frameworks.html 4: http://en.wikipedia.org/wiki/Linker_(computing)#Static_linking</p>
+<p>Lastly, I worry that time and brainpower that I pour into frameworks goes unrewarded. When I don’t want to use a framework, the framework changes, or I want to do something that the framework doesn’t support, I’m left out in the cold. All of these scenarios play out often. Each time a new version of Rails comes out, it is infused with whatever OOP fashion is reigning at the time: concerns, presenters, etc. The way that I <em>used</em> to do something is rendered obsolete without warning and without recourse. The knowledge that I had about how to work with the framework has gone stale – like money, “you can’t take it with you.”</p>
+<p>I think that it is time that we, as software developers, become responsible for our own fate. Make decisions, find out what works, learn! We have no excuse for being held hostage to decisions that we didn’t make just because we didn’t understand the nature of the decision. Software development is more than just filling in the blanks on some giant MadLibs of a framework. Software is the most infinitely pliable medium of design that the world has ever seen. Like a proof, if you can show your reasoning to be sound you can do it that way. There’s no limit, so go out and build!</p>
+</article>
+]]></description>
+    <pubDate>Thu, 08 Jan 2015 00:00:00 UT</pubDate>
+    <guid>http://sencjw.com/posts/2015-01-08-the-quick-hack.html</guid>
+</item>
+<item>
     <title>Haskell Meetup!</title>
     <link>http://sencjw.com/posts/2015-01-03-meetup.html</link>
     <description><![CDATA[<article>
@@ -320,128 +346,6 @@ view fnLens :: MonadReader Person m =&gt; m String</code></pre>
 ]]></description>
     <pubDate>Thu, 03 Oct 2013 00:00:00 UT</pubDate>
     <guid>http://sencjw.com/posts/2013-10-03-reactive-record.html</guid>
-</item>
-<item>
-    <title>named parameters in haskell</title>
-    <link>http://sencjw.com/posts/2013-09-14-named-parameters-in-haskell.html</link>
-    <description><![CDATA[<article>
-  <header>
-    <h1>named parameters in haskell</h1>
-    <p>
-      Posted on September 14, 2013
-      
-    </p>
-  </header>
-
-  <p>I was watching <a href="https://www.youtube.com/watch?v=rI8tNMsozo0">Rich Hickey’s keynote</a> for Rails Conf 2012. I’ve been watching a lot of talks lately because I’ve organized a series of conference talk screenings at my work. And that’s probably a different blog post…</p>
-<p>Anyhow, one thing that he mentioned that I don’t often think about is the complexity introduced with positional parameters. Let me explain:</p>
-<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">function</span> <span class="fu">foo</span>(x, y, z,) {...}</code></pre>
-<p>Requires that x, y, and z all be present in that exact order even if that’s not important:</p>
-<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">function</span> <span class="fu">make_person</span>(first, last, phone) {...}
-<span class="kw">function</span> <span class="fu">make_person</span>(last, first, phone) {...}
-<span class="kw">function</span> <span class="fu">make_person</span>(phone, first, last) {...}</code></pre>
-<p>If you encountered a wild <code>make_person</code>, you’d have to know which definition was the one that was used. The point is it really doesn’t matter that a person’s attributes are listed in that order. Any order is fine. But you’ve, implicitly, introduced a strict order-dependence here. Passing in a map/object/hash fixes this issue<sup><a href="#fn1" class="footnoteRef" id="fnref1">1</a></sup>:</p>
-<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">function</span> <span class="fu">make_person</span>(opts) {
-  opts[<span class="st">&#39;first&#39;</span>] = ...
-  <span class="fu">opts</span>[<span class="st">&#39;last&#39;</span>] = ...
-  <span class="fu">opts</span>[<span class="st">&#39;phone&#39;</span>] = ...
-}</code></pre>
-<p>Haskell is pretty tied to the positional and unnamed argument thing. I was looking into how to do named and/or non-positional arguments.</p>
-<h3 id="datatype">Datatype</h3>
-<p>The first thing that occurred to me is to do something like this:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">import</span> Text.Printf
-
-<span class="kw">data</span> <span class="dt">Person</span> <span class="fu">=</span> <span class="dt">Person</span> {<span class="ot"> firstName ::</span> <span class="dt">String</span>
-                     ,<span class="ot"> lastName ::</span> <span class="dt">String</span>
-                     ,<span class="ot"> email ::</span> <span class="dt">String</span>
-                     }
-
-<span class="ot">formatAddress ::</span> <span class="dt">Person</span> <span class="ot">-&gt;</span> <span class="dt">String</span>
-formatAddress p <span class="fu">=</span> printf <span class="st">&quot;\&quot;%s %s\&quot; &lt;%s&gt;&quot;</span> f l e
-  <span class="kw">where</span>
-    f <span class="fu">=</span> firstName p
-    l <span class="fu">=</span> lastName p
-    e <span class="fu">=</span> email p</code></pre>
-<p>And then I call it like so:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell">formatAddress <span class="dt">Person</span> { firstName <span class="fu">=</span> <span class="st">&quot;Chris&quot;</span>
-                     , lastName <span class="fu">=</span> <span class="st">&quot;Wilson&quot;</span>
-                     , email <span class="fu">=</span> <span class="st">&quot;chris@bendyworks.com&quot;</span>
-                     }</code></pre>
-<p>A slightly better tweak is to create a default that provides values for anything that’s missing (assuming that I have a function that just calls for one parameter):</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell">formatEmail p <span class="fu">=</span> printf <span class="st">&quot;&lt;%s&gt;&quot;</span> (email p)
-
-defaultPerson <span class="fu">=</span> <span class="dt">Person</span> {firstName <span class="fu">=</span> <span class="st">&quot;&quot;</span>, lastName <span class="fu">=</span> <span class="st">&quot;&quot;</span>, email <span class="fu">=</span> <span class="st">&quot;&quot;</span>}</code></pre>
-<p>But that “infects” the call site with the <code>defaultPerson</code> argument:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell">formatEmail defaultPerson {email<span class="fu">=</span><span class="st">&quot;chris@bendyworks.com&quot;</span>}</code></pre>
-<p>All the other, irrelevant arguments are defaulted by the <code>defaultPerson</code> constructor.</p>
-<h3 id="named-records">Named Records</h3>
-<p>This pulls in the big guns of template Haskell to abstract machinery something like what is spelled out above:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">{-# LANGUAGE TemplateHaskell #-}</span>
-
-<span class="kw">import</span> Data.NamedRecord
-<span class="kw">import</span> Text.Printf
-<span class="kw">import</span> Data.Name
-
-name <span class="st">&quot;firstName&quot;</span>
-name <span class="st">&quot;lastName&quot;</span>
-name <span class="st">&quot;email&quot;</span>
-
-record <span class="st">&quot;Person&quot;</span>
-    <span class="ot">`has`</span> <span class="st">&quot;firstName&quot;</span> <span class="fu">:=</span> <span class="ch">&#39;&#39;</span><span class="dt">String</span>
-    <span class="ot">`has`</span> <span class="st">&quot;lastName&quot;</span>  <span class="fu">:=</span> <span class="ch">&#39;&#39;</span><span class="dt">String</span>
-    <span class="ot">`has`</span> <span class="st">&quot;email&quot;</span>     <span class="fu">:=</span> <span class="ch">&#39;&#39;</span><span class="dt">String</span>
-
-<span class="ot">formatEmail ::</span> <span class="dt">Person</span> <span class="ot">-&gt;</span> <span class="dt">String</span>
-formatEmail p <span class="fu">=</span> printf <span class="st">&quot;&lt;%s&gt;&quot;</span> e
-  <span class="kw">where</span>
-    e <span class="fu">=</span> p <span class="ot">`get`</span> email</code></pre>
-<p>But it has a rather pleasant usage:</p>
-<pre><code>formatEmail (newPerson `set` email := &quot;chris@bendyworks.com&quot;)</code></pre>
-<p>There is also a nice way to do <a href="http://hackage.haskell.org/packages/archive/named-records/0.5/doc/html/Data-NamedRecord.html">default arguments</a>. Go check it out, the docs are good.</p>
-<h3 id="lenses">Lenses</h3>
-<p>Okay, I have to admit that I’m less sure about this. Metaphor-weary haskellers please forgive me, but lenses seem to be the space-based laser (SBL) of the Haskell world right now. While the idea is simple, you’d like a way to pinpoint a structure for observation or (destructive) modification, the actual infrastructure surrounding it is rather elaborate. On the <a href="https://www.youtube.com/watch?v=D6sva6hGJ-s">Haskell Cast #1</a>, Edward Kmett goes into the details of the lens library. A few “<a href="http://patternsinfp.wordpress.com/2011/01/31/lenses-are-the-coalgebras-for-the-costate-comonad/">lenses are the coalgebras for the costate comonad</a>”s are thrown around and there’s generally a lot sailing over my head.</p>
-<p>On iota of wisdom that I pulled down from the stratosphere was that lenses are a kind of “getter” and “setter”, albeit ones with firm FP grounding. These can be used to effectively create flexible parameters to functions. “Flexible” just means:</p>
-<ul>
-<li>a pool of parameters to draw from</li>
-<li>that are named rather than positional</li>
-<li>and not all have to pe present</li>
-</ul>
-<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">{-# LANGUAGE TemplateHaskell #-}</span>
-<span class="kw">import</span> Control.Lens
-<span class="kw">import</span> Text.Printf
-
-<span class="kw">data</span> <span class="dt">Person</span> <span class="fu">=</span> <span class="dt">Person</span> { _<span class="ot">firstName ::</span> <span class="dt">String</span>
-                     , _<span class="ot">lastName ::</span> <span class="dt">String</span>
-                     , _<span class="ot">email ::</span> <span class="dt">String</span>
-                     }
-
-makeLenses <span class="ch">&#39;&#39;</span><span class="dt">Person</span>
-
-<span class="co">-- use the &quot;email&quot; getter</span>
-formatEmail p <span class="fu">=</span> printf <span class="st">&quot;&lt;%s&gt;&quot;</span> (p<span class="fu">^.</span>email)
-
-<span class="co">-- issues a warning, but works.</span>
-main <span class="fu">=</span> putStrLn <span class="fu">$</span> formatEmail (<span class="dt">Person</span>{_email<span class="fu">=</span><span class="st">&quot;chris@bendyworks.com&quot;</span>})</code></pre>
-<p>Whew. It feels like cheating, but I really like how this works. Lenses let me “focus” on each field in my data structure by name (or position).</p>
-<p>Lenses seem to fulfill the three bullets that I listed and they do so in the most “natural” way. I say that because, as Edward Kmett, goes into, lenses are useful for a bunch of other stuff and they compose really nicely:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">Person</span> <span class="fu">=</span> <span class="dt">Person</span> { <span class="co">-- ...like above...</span>
-                     , _phone <span class="fu">=</span> <span class="dt">Phone</span> { _number <span class="fu">=</span> <span class="st">&quot;...&quot;</span>, _type <span class="fu">=</span> <span class="st">&quot;mobile&quot;</span> }
-                     }
-
-<span class="kw">data</span> <span class="dt">Phone</span> <span class="fu">=</span> <span class="dt">Phone</span> { _<span class="ot">number ::</span> <span class="dt">String</span>, _<span class="ot">type ::</span> <span class="dt">String</span> }
-
-chris<span class="fu">^.</span>phone<span class="fu">^.</span><span class="kw">type</span> <span class="co">-- equals &quot;mobile&quot;</span></code></pre>
-<p>So, in summary, I feel that lenses provide a credible solution to the named-record/non-positional/keyword arguments problem. Go forth and hack.</p>
-<div class="footnotes">
-<hr />
-<ol>
-<li id="fn1"><p>Well, <em>almost</em>. The ideal thing would be a typed record of some sort so that the function’s access would be guaranteed to be safe. If this weren’t the case then you’d have lost the safety that parameters give you. With parameters, it is instantly obvious if there’s one missing, the call is simply <em>wrong</em>. Likewise with typed records, accessing a field that doesn’t exist would be a compile-time error. In Ruby-style hash access, you’d just get a <code>nil</code> for any missing field/value.<a href="#fnref1">↩</a></p></li>
-</ol>
-</div>
-</article>
-]]></description>
-    <pubDate>Sat, 14 Sep 2013 00:00:00 UT</pubDate>
-    <guid>http://sencjw.com/posts/2013-09-14-named-parameters-in-haskell.html</guid>
 </item>
 
     </channel> 
