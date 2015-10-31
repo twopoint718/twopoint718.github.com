@@ -26,7 +26,7 @@
           <li><a href="../interviews.html">Interviews</a></li>
           <li><a href="../talks.html">Talks</a></li>
           <li><a href="../the_square_root_of_christmas.html">The Square Root of Christmas</a></li>
-          <li><a href="../transparent_web.html">The Transparent Web (book)</a></li>
+          <li><a href="../functional_web.html">The Functional Web (book)</a></li>
           <li><a href="../writings.html">Writings</a></li>
         </ul>
       </nav>
@@ -42,7 +42,7 @@
   </header>
 
   <p>I’ve been playing around with Plan 9 from Bell Labs a bunch lately. It takes the Unix idea that everything should have a file-like interface and runs with that to its logical (and surprisingly useful) extreme. It seems like a system that hangs together really well and has the feeling that it was actually designed, rather than grown. But that’s enough about that. What I wanted to mention was a script, <code>bundle(1)</code>, that I found to be really useful. So, use the source, Luke!, and then I’ll say something about it:</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="co">#!/bin/sh</span>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co">#!/bin/sh</span>
 <span class="kw">echo</span> <span class="st">'# To unbundle, run this file'</span>
 <span class="kw">for</span> <span class="kw">i</span>
 <span class="kw">do</span>
@@ -50,13 +50,13 @@
     <span class="kw">echo</span> <span class="st">&quot;sed 's/.//' &gt;</span><span class="ot">$i</span><span class="st"> &lt;&lt;'//GO.SYSIN DD </span><span class="ot">$i</span><span class="st">'&quot;</span>
     <span class="kw">sed</span> <span class="st">&quot;s/^/-/&quot;</span> <span class="ot">$i</span>
     <span class="kw">echo</span> <span class="st">&quot;//GO.SYSIN DD </span><span class="ot">$i</span><span class="st">&quot;</span>
-<span class="kw">done</span></code></pre>
+<span class="kw">done</span></code></pre></div>
 <p>Cool huh? It’s kinda meta but here’s what it does: when you run it like <code>bundle file1 file2 &gt; regen.sh</code> it outputs a script that when run will recreate <code>file1</code> and <code>file2</code>. It does this with a few applications of sed. Using <code>file1</code> and <code>file2</code> as examples, say I have <code>file1</code>’s contents:</p>
 <pre><code>hello</code></pre>
 <p>and file2 is:</p>
 <pre><code>world!</code></pre>
 <p>after running bundle with these two files the contents of regen.sh will look like this:</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="co"># To unbundle, run this file</span>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co"># To unbundle, run this file</span>
 <span class="kw">echo</span> file1
 <span class="kw">sed</span> <span class="st">'s/.//'</span> <span class="kw">&gt;</span> file1 &lt;&lt;'//GO.SYSIN DD file1'
 -hello
@@ -64,7 +64,7 @@
 echo file2
 sed 's/.//' <span class="kw">&gt;</span> <span class="kw">file2</span> &lt;&lt;'//GO.SYSIN DD file<span class="kw">2</span><span class="st">'</span>
 <span class="st">-world!</span>
-<span class="st">//GO.SYSIN DD file2</span></code></pre>
+<span class="st">//GO.SYSIN DD file2</span></code></pre></div>
 <p>so, if you run this file, it prints “file1” and “file2” to the terminal, but then writes “hello” and “world” to file1 and file2, respectively (after having stripped the “-” off of each line using sed). So this is a neat little way to package up a bunch of text-ish files into a single “self-expanding” package.</p>
 </article>
 

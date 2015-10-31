@@ -26,7 +26,7 @@
           <li><a href="../interviews.html">Interviews</a></li>
           <li><a href="../talks.html">Talks</a></li>
           <li><a href="../the_square_root_of_christmas.html">The Square Root of Christmas</a></li>
-          <li><a href="../transparent_web.html">The Transparent Web (book)</a></li>
+          <li><a href="../functional_web.html">The Functional Web (book)</a></li>
           <li><a href="../writings.html">Writings</a></li>
         </ul>
       </nav>
@@ -51,47 +51,47 @@
 <li>Do this daily or almost-daily for about 4-8 weeks (that’s about how long it took me to match and then exceed my QWERTY speed)</li>
 </ol>
 <p>To deal with steps 2 and 3 on the twiddler, I wrote this short python script that pulls words out out /usr/share/dict/words that can be typed without any chord (open), using the first chord key (1st or “L”), and finally the second chord key (2nd or “M”). I don’t have the third chord key on here because using just the first and second is sufficient for all letters. Here’s the script:</p>
-<pre class="sourceCode python"><code class="sourceCode python"><span class="ch">import</span> random
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="im">import</span> random
 
 <span class="kw">def</span> all_from(target_list, input_list):
-    <span class="kw">for</span> c in input_list:
-        <span class="kw">if</span> not c in target_list:
-            <span class="kw">return</span> <span class="ot">False</span>
-    <span class="kw">return</span> <span class="ot">True</span>
+    <span class="cf">for</span> c <span class="op">in</span> input_list:
+        <span class="cf">if</span> <span class="op">not</span> c <span class="op">in</span> target_list:
+            <span class="cf">return</span> <span class="va">False</span>
+    <span class="cf">return</span> <span class="va">True</span>
 
 <span class="kw">def</span> first_set(input_word):
-    <span class="kw">return</span> all_from(<span class="st">&quot;abcdefghABCDEFGH&quot;</span>, input_word)
+    <span class="cf">return</span> all_from(<span class="st">&quot;abcdefghABCDEFGH&quot;</span>, input_word)
 
 <span class="kw">def</span> second_set(input_word):
-    <span class="kw">return</span> all_from(<span class="st">&quot;ijklmnopqIJKLMNOPQ&quot;</span>, input_word)
+    <span class="cf">return</span> all_from(<span class="st">&quot;ijklmnopqIJKLMNOPQ&quot;</span>, input_word)
 
 <span class="kw">def</span> third_set(input_word):
-    <span class="kw">return</span> all_from(<span class="st">&quot;rstuvwxyzRSTUVWXYZ&quot;</span>, input_word)
+    <span class="cf">return</span> all_from(<span class="st">&quot;rstuvwxyzRSTUVWXYZ&quot;</span>, input_word)
 
 <span class="kw">def</span> fourth_set(input_word):
-    <span class="kw">return</span> all_from(<span class="st">&quot;.,;'</span><span class="ch">\&quot;</span><span class="st">?!-&quot;</span>, input_word)
+    <span class="cf">return</span> all_from(<span class="st">&quot;.,;'</span><span class="ch">\&quot;</span><span class="st">?!-&quot;</span>, input_word)
 
-<span class="kw">def</span> search_words(words, key_set=first_set):
-    out = []
-    <span class="kw">for</span> word in words:
-        <span class="kw">if</span> key_set(word) and <span class="dt">len</span>(word) &gt; <span class="dv">1</span>:
+<span class="kw">def</span> search_words(words, key_set<span class="op">=</span>first_set):
+    out <span class="op">=</span> []
+    <span class="cf">for</span> word <span class="op">in</span> words:
+        <span class="cf">if</span> key_set(word) <span class="op">and</span> <span class="bu">len</span>(word) <span class="op">&gt;</span> <span class="dv">1</span>:
             out.append(word)
-    <span class="kw">return</span> out
+    <span class="cf">return</span> out
 
-<span class="kw">if</span> <span class="dt">__name__</span> == <span class="st">&quot;__main__&quot;</span>:
-    get_words = <span class="dv">10</span>
-    fname = <span class="st">&quot;/usr/share/dict/words&quot;</span>
-    wordlist = <span class="dt">open</span>(fname, <span class="st">&quot;r&quot;</span>).read().split(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)
+<span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">&quot;__main__&quot;</span>:
+    get_words <span class="op">=</span> <span class="dv">10</span>
+    fname <span class="op">=</span> <span class="st">&quot;/usr/share/dict/words&quot;</span>
+    wordlist <span class="op">=</span> <span class="bu">open</span>(fname, <span class="st">&quot;r&quot;</span>).read().split(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)
 
-    first = search_words(wordlist, first_set)
-    second = search_words(wordlist, second_set)
-    third = search_words(wordlist, third_set)
+    first <span class="op">=</span> search_words(wordlist, first_set)
+    second <span class="op">=</span> search_words(wordlist, second_set)
+    third <span class="op">=</span> search_words(wordlist, third_set)
     <span class="co">#fourth = search_words(wordlist, fourth_set) # need wordlist w/ punct.</span>
 
-    <span class="kw">print</span> <span class="st">&quot;open: &quot;</span>, <span class="st">&quot; &quot;</span>.join(random.sample(first, get_words))
-    <span class="kw">print</span> <span class="st">&quot;1st:  &quot;</span>, <span class="st">&quot; &quot;</span>.join(random.sample(second, get_words))
-    <span class="kw">print</span> <span class="st">&quot;2nd:  &quot;</span>, <span class="st">&quot; &quot;</span>.join(random.sample(third, get_words))
-    <span class="co">#print &quot;3rd:  &quot;, &quot; &quot;.join(random.sample(fourth, get_words))</span></code></pre>
+    <span class="bu">print</span> <span class="st">&quot;open: &quot;</span>, <span class="st">&quot; &quot;</span>.join(random.sample(first, get_words))
+    <span class="bu">print</span> <span class="st">&quot;1st:  &quot;</span>, <span class="st">&quot; &quot;</span>.join(random.sample(second, get_words))
+    <span class="bu">print</span> <span class="st">&quot;2nd:  &quot;</span>, <span class="st">&quot; &quot;</span>.join(random.sample(third, get_words))
+    <span class="co">#print &quot;3rd:  &quot;, &quot; &quot;.join(random.sample(fourth, get_words))</span></code></pre></div>
 </article>
 
       </main>

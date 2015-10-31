@@ -26,7 +26,7 @@
           <li><a href="../interviews.html">Interviews</a></li>
           <li><a href="../talks.html">Talks</a></li>
           <li><a href="../the_square_root_of_christmas.html">The Square Root of Christmas</a></li>
-          <li><a href="../transparent_web.html">The Transparent Web (book)</a></li>
+          <li><a href="../functional_web.html">The Functional Web (book)</a></li>
           <li><a href="../writings.html">Writings</a></li>
         </ul>
       </nav>
@@ -43,56 +43,56 @@
 
   <p>There’s a cool article by Steve Losh called <a href="http://stevelosh.com/blog/2013/03/list-out-of-lambda/">List out of Lambda</a> that reminded me, in a really good way, of a section in SICP. If you want to read the boiled-down scheme version that’s in SICP, here it is (my paraphrasing from <a href="http://mitpress.mit.edu/sicp/full-text/book/book-Z-H-14.html#%_sec_2.1.3">SICP section 2.1.3</a>)</p>
 <p><code>cons</code> makes a list by putting an element onto the front of an existing list.</p>
-<pre class="sourceCode scheme"><code class="sourceCode scheme">(<span class="kw">cons</span> <span class="dv">1</span> '()) <span class="co">; '(1)</span></code></pre>
+<div class="sourceCode"><pre class="sourceCode scheme"><code class="sourceCode scheme">(<span class="kw">cons</span> <span class="dv">1</span> '()) <span class="co">; '(1)</span></code></pre></div>
 <p>that’s empty list <code>'()</code> and a list with just “1” in it above <code>'(1)</code>. There’s two other functions that deconstruct a list: <code>car</code> and <code>cdr</code>, or head and tail (name’s not really important):</p>
-<pre class="sourceCode scheme"><code class="sourceCode scheme">(<span class="kw">car</span> '(<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span>)) <span class="co">; 1</span>
-(<span class="kw">cdr</span> '(<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span>)) <span class="co">; '(2 3)</span></code></pre>
+<div class="sourceCode"><pre class="sourceCode scheme"><code class="sourceCode scheme">(<span class="kw">car</span> '(<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span>)) <span class="co">; 1</span>
+(<span class="kw">cdr</span> '(<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span>)) <span class="co">; '(2 3)</span></code></pre></div>
 <p><code>car</code> returns the head of the list and <code>cdr</code> returns the rest of the list (without the head). You’d think that <code>car</code>, <code>cdr</code>, and <code>cons</code> would pretty much have to be built in functions, but actually they don’t!</p>
-<pre class="sourceCode scheme"><code class="sourceCode scheme">(<span class="kw">define</span><span class="fu"> </span>(<span class="kw">cons</span> x y)
+<div class="sourceCode"><pre class="sourceCode scheme"><code class="sourceCode scheme">(<span class="kw">define</span><span class="fu"> </span>(<span class="kw">cons</span> x y)
   (<span class="kw">define</span><span class="fu"> </span>(dispatch m)
     (<span class="kw">cond</span> ((<span class="kw">=</span> m <span class="dv">0</span>) x)
           ((<span class="kw">=</span> m <span class="dv">1</span>) y)
           (<span class="kw">else</span> (error <span class="st">&quot;Argument not 0 or 1 -- CONS&quot;</span> m))))
-  dispatch)</code></pre>
+  dispatch)</code></pre></div>
 <p>This is the trickiest thing to grok, but then you’re in the clear. Calling <code>cons</code> returns a function (called <code>dispatch</code>) which “closes” over its two arguments. That means that the function is implicitly storing <code>x</code> and <code>y</code> off where function arguments are stored. <code>dispatch</code> takes a single argument, <code>m</code>, which acts like a kind of selector. If <code>m == 0</code>, then dispatch returns the first argument to <code>cons</code>, if <code>m == 1</code>, then <code>dispatch</code> returns the second argument to <code>cons</code>.</p>
-<pre class="sourceCode scheme"><code class="sourceCode scheme">((<span class="kw">cons</span> <span class="dv">1</span> '(<span class="dv">2</span> <span class="dv">3</span>)) <span class="dv">0</span>) <span class="co">; 1</span>
-((<span class="kw">cons</span> <span class="dv">1</span> '(<span class="dv">2</span> <span class="dv">3</span>)) <span class="dv">1</span>) <span class="co">; '(2 3)</span></code></pre>
+<div class="sourceCode"><pre class="sourceCode scheme"><code class="sourceCode scheme">((<span class="kw">cons</span> <span class="dv">1</span> '(<span class="dv">2</span> <span class="dv">3</span>)) <span class="dv">0</span>) <span class="co">; 1</span>
+((<span class="kw">cons</span> <span class="dv">1</span> '(<span class="dv">2</span> <span class="dv">3</span>)) <span class="dv">1</span>) <span class="co">; '(2 3)</span></code></pre></div>
 <p>Now we just define <code>car</code> and <code>cdr</code> to do exactly this:</p>
-<pre class="sourceCode scheme"><code class="sourceCode scheme">(<span class="kw">define</span><span class="fu"> </span>(<span class="kw">car</span> lst)
+<div class="sourceCode"><pre class="sourceCode scheme"><code class="sourceCode scheme">(<span class="kw">define</span><span class="fu"> </span>(<span class="kw">car</span> lst)
   (lst <span class="dv">0</span>))
 
 (<span class="kw">define</span><span class="fu"> </span>(<span class="kw">cdr</span> lst)
-  (lst <span class="dv">1</span>))</code></pre>
+  (lst <span class="dv">1</span>))</code></pre></div>
 <p>Remember that the way that this works is that the list is being stored as a function so the only thing we can do is to call it!</p>
-<pre class="sourceCode scheme"><code class="sourceCode scheme">(<span class="kw">car</span> (<span class="kw">cons</span> <span class="dv">1</span> '(<span class="dv">2</span> <span class="dv">3</span>))) <span class="co">; 1</span>
-(<span class="kw">cdr</span> (<span class="kw">cons</span> <span class="dv">1</span> '(<span class="dv">2</span> <span class="dv">3</span>))) <span class="co">; '(2 3)</span></code></pre>
+<div class="sourceCode"><pre class="sourceCode scheme"><code class="sourceCode scheme">(<span class="kw">car</span> (<span class="kw">cons</span> <span class="dv">1</span> '(<span class="dv">2</span> <span class="dv">3</span>))) <span class="co">; 1</span>
+(<span class="kw">cdr</span> (<span class="kw">cons</span> <span class="dv">1</span> '(<span class="dv">2</span> <span class="dv">3</span>))) <span class="co">; '(2 3)</span></code></pre></div>
 <p>Cool! We just built lists out of “nothing”. If you want to be even more mind-bending. You can make the <code>dispatch</code> function anonymous:</p>
-<pre class="sourceCode scheme"><code class="sourceCode scheme">(<span class="kw">define</span><span class="fu"> </span>(<span class="kw">cons</span> x y)
+<div class="sourceCode"><pre class="sourceCode scheme"><code class="sourceCode scheme">(<span class="kw">define</span><span class="fu"> </span>(<span class="kw">cons</span> x y)
   (<span class="kw">lambda</span> (m)
     (<span class="kw">cond</span> ((<span class="kw">=</span> m <span class="dv">0</span>) x)
           ((<span class="kw">=</span> m <span class="dv">1</span>) y)
-          (<span class="kw">else</span> (error <span class="st">&quot;Argument not 0 or 1 -- CONS&quot;</span> m)))))</code></pre>
+          (<span class="kw">else</span> (error <span class="st">&quot;Argument not 0 or 1 -- CONS&quot;</span> m)))))</code></pre></div>
 <p>It works the same.</p>
 <p>If you view functions as little boxes that basically just contain their return values this makes sense. A function is like a box that, when given its argument barfs up the result. In fact, don’t think of a function as <em>doing</em> something, think of it as <em>being</em> something. If it is first class then you should be able to treat it this way in all respects. You can pass around these little boxes that have some value “in” them and the only way to get it out is to “call” it (or force, or… whatever). But, and we’re starting to tread into heavy functional land here, what if you weren’t so hung up on the idea of getting the value “out” of the box?</p>
-<pre class="sourceCode scheme"><code class="sourceCode scheme">(<span class="kw">define</span><span class="fu"> </span>(box-it-up x) (<span class="kw">lambda</span> () x))</code></pre>
+<div class="sourceCode"><pre class="sourceCode scheme"><code class="sourceCode scheme">(<span class="kw">define</span><span class="fu"> </span>(box-it-up x) (<span class="kw">lambda</span> () x))</code></pre></div>
 <p>This puts a value, <code>x</code>, in a box. You can do whatever you want with the box. You can store it, you can pass it around etc. And, of course, you can open it up by doing this:</p>
-<pre class="sourceCode scheme"><code class="sourceCode scheme">((box-it-up <span class="dv">10</span>)) <span class="co">; 10</span></code></pre>
+<div class="sourceCode"><pre class="sourceCode scheme"><code class="sourceCode scheme">((box-it-up <span class="dv">10</span>)) <span class="co">; 10</span></code></pre></div>
 <p>If that’s a bit hard to read, just remember that whatever is the first thing in a lisp list is called. Javascript would be:</p>
-<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="fu">box_it_up</span>(<span class="dv">10</span>)(); <span class="co">// 10</span></code></pre>
+<div class="sourceCode"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="at">box_it_up</span>(<span class="dv">10</span>)()<span class="op">;</span> <span class="co">// 10</span></code></pre></div>
 <p>But let’s say that we don’t really care to open the box (we labeled our boxes really well). We just want to make sure that, whenever it is opened, that we obey special handling instructions. Let’s write “double this” on the box.</p>
-<pre class="sourceCode scheme"><code class="sourceCode scheme">(<span class="kw">define</span><span class="fu"> </span>(double-this box)
-  (<span class="kw">lambda</span> () (* (box) <span class="dv">2</span>)))</code></pre>
+<div class="sourceCode"><pre class="sourceCode scheme"><code class="sourceCode scheme">(<span class="kw">define</span><span class="fu"> </span>(double-this box)
+  (<span class="kw">lambda</span> () (* (box) <span class="dv">2</span>)))</code></pre></div>
 <p>Maybe I bent the rules a bit. I used a magic pen that when I wrote <code>double-this</code> on the box, it performed an old mover’s optimization trick. Instead of just having our original box I magically duplicated the old box with the twist that the new box now contains double whatever was in the old one ;) Got that? (Hey, metaphors are hard).</p>
 <p>Maybe you can see where I’m going here. I don’t want to have to make a new kind of <code>double-this</code> function every time I want to do something. How about I just give you the magic pen?</p>
-<pre class="sourceCode scheme"><code class="sourceCode scheme">(<span class="kw">define</span><span class="fu"> </span>(magic-pen box func)
-  (<span class="kw">lambda</span> () (func (box))))</code></pre>
+<div class="sourceCode"><pre class="sourceCode scheme"><code class="sourceCode scheme">(<span class="kw">define</span><span class="fu"> </span>(magic-pen box func)
+  (<span class="kw">lambda</span> () (func (box))))</code></pre></div>
 <p>That means you can write <code>double-this</code> like so:</p>
-<pre class="sourceCode scheme"><code class="sourceCode scheme">(<span class="kw">define</span><span class="fu"> </span>(double-this box)
-  (magic-pen box (<span class="kw">lambda</span> (x) (* <span class="dv">2</span> x))))</code></pre>
+<div class="sourceCode"><pre class="sourceCode scheme"><code class="sourceCode scheme">(<span class="kw">define</span><span class="fu"> </span>(double-this box)
+  (magic-pen box (<span class="kw">lambda</span> (x) (* <span class="dv">2</span> x))))</code></pre></div>
 <p>Here’s how this all looks now:</p>
-<pre class="sourceCode scheme"><code class="sourceCode scheme">(<span class="kw">define</span><span class="fu"> twenty-box </span>(double-this (box-it-up <span class="dv">10</span>)))
+<div class="sourceCode"><pre class="sourceCode scheme"><code class="sourceCode scheme">(<span class="kw">define</span><span class="fu"> twenty-box </span>(double-this (box-it-up <span class="dv">10</span>)))
 
-(twenty-box) <span class="co">; 20</span></code></pre>
+(twenty-box) <span class="co">; 20</span></code></pre></div>
 <p>cool! So this is how I’ve been thinking about Promises in javascript. We have a kind of box but, unlike functions, we really can’t open up for the simple reason that the value may not have happened yet! But it is no biggie because we can do whatever we like to the values inside inside the box!</p>
 <p>If you’ve got all that, then I’m happy because I’ve also kinda sorted tricked you into understanding monads. Did you notice how I was just able to handwave at the end and say, “yeah, but instead of functions the ‘box’ is some as-yet-unreceived network packet”? Monads are just the idea that you can compute all day long with these sorts of “unopened boxes”. Well not <em>just</em>, but the devil is in the details and that means that I’ll probably write another blog post about it.</p>
 </article>

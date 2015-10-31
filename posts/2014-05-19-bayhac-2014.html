@@ -26,7 +26,7 @@
           <li><a href="../interviews.html">Interviews</a></li>
           <li><a href="../talks.html">Talks</a></li>
           <li><a href="../the_square_root_of_christmas.html">The Square Root of Christmas</a></li>
-          <li><a href="../transparent_web.html">The Transparent Web (book)</a></li>
+          <li><a href="../functional_web.html">The Functional Web (book)</a></li>
           <li><a href="../writings.html">Writings</a></li>
         </ul>
       </nav>
@@ -46,17 +46,17 @@
 <p>The hackathon started out with a talk on Pipes by Gabriel Gonzalez and then one on Free Monads by Dan Piponi. Both were excellent. And <em>excellent</em> here means that I think they were both the most lucid explanations of their respective topic that I’ve yet seen.</p>
 <p>Gabriel’s talk really helped to solidify my understanding of where pipes sit relative to <a href="http://hackage.haskell.org/package/conduit-1.0.15">conduit</a>, the other streaming-data library that I’m familiar with. The emphasis in the pipes talk was on the intuition behind the <a href="http://hackage.haskell.org/package/pipes-4.1.2/docs/Pipes.html#t:ListT"><code>ListT</code></a> type and the <a href="http://hackage.haskell.org/package/pipes-4.1.2/docs/Pipes.html#t:yield"><code>yield</code></a> and <a href="http://hackage.haskell.org/package/pipes-4.1.2/docs/Pipes.html#t:await"><code>await</code></a> functions.</p>
 <p>Dan Piponi spoke on free monads, <a href="https://docs.google.com/file/d/0B51SFgxqMDS-NDBOX0ZDdW52dEE/edit">Free, but not as in beer or speech</a> (<a href="https://plus.google.com/u/0/events/cu5t5s2g14t4fqmapft5bcatqeg">video</a>), by first starting with an algebraic structure called a <em>magma</em>, which is simply a single, closed binary operation on a set:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">class</span> <span class="dt">Magma</span> <span class="kw">where</span>
-<span class="ot">    o ::</span> a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> a</code></pre>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">class</span> <span class="dt">Magma</span> <span class="kw">where</span>
+<span class="ot">    o ::</span> a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> a</code></pre></div>
 <p>Next he suggested the idea of the “least special magma.” We want to capture the idea that we can do this binary operation, and that we have things that are part of the set (the <code>a</code> above). This leads us to a tree:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">FreeMagma</span> a <span class="fu">=</span> <span class="dt">Var</span> a
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">FreeMagma</span> a <span class="fu">=</span> <span class="dt">Var</span> a
                  <span class="fu">|</span> <span class="dt">Tree</span> (<span class="dt">FreeMagma</span> a) (<span class="dt">FreeMagma</span> a)
 <span class="kw">instance</span> <span class="dt">Magma</span> (<span class="dt">FreeMagma</span> a) <span class="kw">where</span>
-    o <span class="fu">=</span> <span class="dt">Tree</span></code></pre>
+    o <span class="fu">=</span> <span class="dt">Tree</span></code></pre></div>
 <p>So the idea is that we’re combining two subexpressions (which could be just <code>Var a</code>, of course) and that’s it. The <em>structure</em> embodies the operation that we’re interested in. I don’t want to recapitulate the talk, but here’s one last slide. We can kinda crawl the structure that we’ve set up in order to evaluate the free magma:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">interpretMagma ::</span> <span class="dt">Magma</span> b <span class="ot">=&gt;</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> (<span class="dt">FreeMagma</span> a <span class="ot">-&gt;</span> b)
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">interpretMagma ::</span> <span class="dt">Magma</span> b <span class="ot">=&gt;</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> (<span class="dt">FreeMagma</span> a <span class="ot">-&gt;</span> b)
 interpretMagma f (<span class="dt">Var</span> a) <span class="fu">=</span> f a
-interpretMagma f (<span class="dt">Tree</span> a b) <span class="fu">=</span> interpretMagma f a <span class="ot">`o`</span> interpretMagma f b</code></pre>
+interpretMagma f (<span class="dt">Tree</span> a b) <span class="fu">=</span> interpretMagma f a <span class="ot">`o`</span> interpretMagma f b</code></pre></div>
 <p>Evaluating this thing is really just replacing the structure with elements of our choosing according to some rule.</p>
 <p>The talk goes on (and the plot thickens!) by moving into free monoids and then, free monads. It was a great introduction!</p>
 <h2 id="saturday">Saturday</h2>
@@ -65,30 +65,30 @@ interpretMagma f (<span class="dt">Tree</span> a b) <span class="fu">=</span> in
 <p><em>Caution, the following is based on my own emerging understanding of Lenses. Please pardon any errors (and I welcome corrections).</em></p>
 <p>What started to make sense for me was the connection between <a href="https://hackage.haskell.org/package/lens-4.1.2/docs/Control-Lens-Setter.html#v:over">over</a>, <a href="http://hackage.haskell.org/package/base-4.7.0.0/docs/Data-Traversable.html#v:traverse">traverse</a>, and <a href="http://hackage.haskell.org/package/lens-4.1.2.1/docs/Control-Lens-Lens.html#t:Lens">Lens</a>.</p>
 <p>First, looking at traverse, which has the type:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell">traverse
-<span class="ot">  ::</span> (<span class="dt">Traversable</span> t, <span class="dt">Applicative</span> f) <span class="ot">=&gt;</span> (a <span class="ot">-&gt;</span> f b) <span class="ot">-&gt;</span> t a <span class="ot">-&gt;</span> f (t b)</code></pre>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">traverse
+<span class="ot">  ::</span> (<span class="dt">Traversable</span> t, <span class="dt">Applicative</span> f) <span class="ot">=&gt;</span> (a <span class="ot">-&gt;</span> f b) <span class="ot">-&gt;</span> t a <span class="ot">-&gt;</span> f (t b)</code></pre></div>
 <p>you can think of it as a sort of generalized <a href="http://hackage.haskell.org/package/base-4.7.0.0/docs/Data-List.html#v:map">map</a> (I do). We know the <code>f</code> above is a Functor because:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">class</span> <span class="dt">Functor</span> f <span class="ot">=&gt;</span> <span class="dt">Applicative</span> f <span class="kw">where</span> <span class="fu">...</span></code></pre>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">class</span> <span class="dt">Functor</span> f <span class="ot">=&gt;</span> <span class="dt">Applicative</span> f <span class="kw">where</span> <span class="fu">...</span></code></pre></div>
 <p>So, picking an Applicative, say the <a href="http://hackage.haskell.org/package/transformers-0.4.1.0/docs/Data-Functor-Identity.html#t:Identity">Identity</a> Applicative, you can write something like map:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">map' ::</span> <span class="dt">Traversable</span> t <span class="ot">=&gt;</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> t a <span class="ot">-&gt;</span> t b
-map' f <span class="fu">=</span> runIdentity <span class="fu">.</span> traverse (<span class="dt">Identity</span> <span class="fu">.</span> f)</code></pre>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">map' ::</span> <span class="dt">Traversable</span> t <span class="ot">=&gt;</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> t a <span class="ot">-&gt;</span> t b
+map' f <span class="fu">=</span> runIdentity <span class="fu">.</span> traverse (<span class="dt">Identity</span> <span class="fu">.</span> f)</code></pre></div>
 <p>notice how we’re sort of “packaging” up the result of the function in a dummy Applicative (<code>runIdentity . Identity == id</code>), which we then immediately discard. This is exactly the sort of sleight of hand that we need for Lens:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">type</span> <span class="dt">Lens</span> s t a b <span class="fu">=</span> forall f<span class="fu">.</span> <span class="dt">Functor</span> f <span class="ot">=&gt;</span> (a <span class="ot">-&gt;</span> f b) <span class="ot">-&gt;</span> s <span class="ot">-&gt;</span> f t</code></pre>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">type</span> <span class="dt">Lens</span> s t a b <span class="fu">=</span> forall f<span class="fu">.</span> <span class="dt">Functor</span> f <span class="ot">=&gt;</span> (a <span class="ot">-&gt;</span> f b) <span class="ot">-&gt;</span> s <span class="ot">-&gt;</span> f t</code></pre></div>
 <p>Notice how the <a href="https://hackage.haskell.org/package/lens-4.1.2/docs/Control-Lens-Getter.html#v:view">view</a> function does something really similar:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">view ::</span> <span class="dt">MonadReader</span> s m <span class="ot">=&gt;</span> <span class="dt">Getting</span> a s a <span class="ot">-&gt;</span> m a
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">view ::</span> <span class="dt">MonadReader</span> s m <span class="ot">=&gt;</span> <span class="dt">Getting</span> a s a <span class="ot">-&gt;</span> m a
 <span class="co">-- re-written with definition of Getting</span>
-<span class="ot">view ::</span> <span class="dt">MonadReader</span> s m <span class="ot">=&gt;</span> (a <span class="ot">-&gt;</span> <span class="dt">Const</span> a a) <span class="ot">-&gt;</span> s <span class="ot">-&gt;</span> <span class="dt">Const</span> a s <span class="ot">-&gt;</span> m a</code></pre>
+<span class="ot">view ::</span> <span class="dt">MonadReader</span> s m <span class="ot">=&gt;</span> (a <span class="ot">-&gt;</span> <span class="dt">Const</span> a a) <span class="ot">-&gt;</span> s <span class="ot">-&gt;</span> <span class="dt">Const</span> a s <span class="ot">-&gt;</span> m a</code></pre></div>
 <p><code>Const</code> is similar to <code>Identity</code> in that it has a “weird” definition:</p>
 <p>`<code>haskell instance Functor (Const m) where     fmap _ (Const v) = Const v    -- the function doesn't matter!</code></p>
 <p>putting that all together (and I’m still a bit fuzzy on how the types work out on these) gives you something that takes a Lens of some structure but then <em>ignores</em> that structure (the <code>s</code> in the <code>Const a s</code>). So you’re getting your structure with the value picked out, but then ignoring the structure (and leaving just the value you’re interested in).</p>
 <p>That’s really handwavey, but here’s an example:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">Person</span> <span class="fu">=</span> <span class="dt">Person</span> {<span class="ot"> fn ::</span> <span class="dt">String</span> ,<span class="ot"> ln ::</span> <span class="dt">String</span> }
-<span class="co">-- e.g. fn (Person &quot;Chris&quot; &quot;Wilson&quot;) == &quot;Chris&quot;)</span></code></pre>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">Person</span> <span class="fu">=</span> <span class="dt">Person</span> {<span class="ot"> fn ::</span> <span class="dt">String</span> ,<span class="ot"> ln ::</span> <span class="dt">String</span> }
+<span class="co">-- e.g. fn (Person &quot;Chris&quot; &quot;Wilson&quot;) == &quot;Chris&quot;)</span></code></pre></div>
 <p>Now I can make a <code>Lens</code> of <code>fn</code> by specifying my own getter and setter functions:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell">fnLens <span class="fu">=</span> lens fn (\(<span class="dt">Person</span> a b) v <span class="ot">-&gt;</span> <span class="dt">Person</span> v b)</code></pre>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">fnLens <span class="fu">=</span> lens fn (\(<span class="dt">Person</span> a b) v <span class="ot">-&gt;</span> <span class="dt">Person</span> v b)</code></pre></div>
 <p>Now I can use that to access the <code>Person</code> structure:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell">view fnLens (<span class="dt">Person</span> <span class="st">&quot;Chris&quot;</span> <span class="st">&quot;Wilson&quot;</span>)
-<span class="co">-- &quot;Chris&quot;</span></code></pre>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">view fnLens (<span class="dt">Person</span> <span class="st">&quot;Chris&quot;</span> <span class="st">&quot;Wilson&quot;</span>)
+<span class="co">-- &quot;Chris&quot;</span></code></pre></div>
 <p>And the type would be something like:</p>
 <pre><code>view   :: (a -&gt; Const a a)                -- as above
        -&gt; s
@@ -103,7 +103,7 @@ view fnLens :: MonadReader Person m =&gt; m String</code></pre>
 <p>The above type signature is a bit wonky, but I think it captures what’s happening as the types unify. So it all boils down to something that extracts a <code>String</code> from a <code>Person</code>. But the intuition that is starting to grow for me is that Lenses let you use a carefully-chosen (i.e. <code>Const</code>) <code>Functor</code> to “smuggle” a value out of a bigger structure.</p>
 <h2 id="sunday">Sunday</h2>
 <p>I spent a lot of time on Sunday working on Joe Nelson’s <a href="https://github.com/begriffs/haskell-vim-now">haskell-vim-now</a> one-line Haskell Vim installer. Lots of people were excited about the prospect of having an easy-to-install Vim mode. I think that this has made a lot of progress. If you like Vim and want to do Haskell development, go install it now. If you want to just install it here, just run this:</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">curl</span> -o - https://raw.githubusercontent.com/begriffs/haskell-vim-now/master/install.sh <span class="kw">|</span> <span class="kw">bash</span></code></pre>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">curl</span> -o - https://raw.githubusercontent.com/begriffs/haskell-vim-now/master/install.sh <span class="kw">|</span> <span class="kw">bash</span></code></pre></div>
 <p>But please see the <a href="https://github.com/begriffs/haskell-vim-now/blob/master/README.md">README</a> for keybindings and general tips on use. Also, if there is anything that you’d like to see included or revised, you are <a href="https://github.com/begriffs/haskell-vim-now/issues">invited to submit an issue</a>.</p>
 <p>I also spent some time talking with the <a href="https://snowdrift.coop">Snowdrift.coop</a> developers. This is a funding platform that seeks to crowdfund ongoing Free/Libre/Open Source projects. They have a nice <a href="https://snowdrift.coop/p/snowdrift/w/intro">intro</a>. The Haskell angle here is that this is a Yesod app: source <a href="https://github.com/dlthomas/snowdrift">on Github</a> and <a href="https://gitorious.org/snowdrift/snowdrift/source/6b587c9c176aa24917c7403dbadd3778e17d08b4:">on Gitorious</a>.</p>
 <h2 id="summary">Summary</h2>
