@@ -1,0 +1,61 @@
+==================================================================
+https://keybase.io/cjw
+--------------------------------------------------------------------
+
+I hereby claim:
+
+  * I am an admin of http://sencjw.com
+  * I am cjw (https://keybase.io/cjw) on keybase.
+  * I have a public key with fingerprint 1AE3 0A0B 22CC FC2D 3AA7  A85E C40B DE79 6D77 35C5
+
+To do so, I am signing this object:
+
+{
+    "body": {
+        "key": {
+            "eldest_kid": "0111522dc1c4a4642db1c3129ad117de21db2946a5df87c462331d802ac75d6b4ffb0a",
+            "fingerprint": "1ae30a0b22ccfc2d3aa7a85ec40bde796d7735c5",
+            "host": "keybase.io",
+            "key_id": "c40bde796d7735c5",
+            "kid": "0111522dc1c4a4642db1c3129ad117de21db2946a5df87c462331d802ac75d6b4ffb0a",
+            "uid": "358a2bc6a7518132aa263215eb6b7500",
+            "username": "cjw"
+        },
+        "service": {
+            "hostname": "sencjw.com",
+            "protocol": "http:"
+        },
+        "type": "web_service_binding",
+        "version": 1
+    },
+    "ctime": 1486092979,
+    "expire_in": 157680000,
+    "prev": "d5adcda28350d19bc99ce19ad628998868e0f5c14679e183f4ab6e4e73deab45",
+    "seqno": 16,
+    "tag": "signature"
+}
+
+which yields the signature:
+
+-----BEGIN PGP MESSAGE-----
+Comment: GPGTools - http://gpgtools.org
+
+owGtUj1rVEEUfW6iYEQ0rVaOnSzLfH9sLQo2YqfVYz7u24zJvre+97LrEtKnFOws
+UvkH7FKk1MpWsFLERcTSSkghziyxs3SaYe4958y5h/vi6kYx2H575fNyuhDvLrz/
+4YrHL89ODpBrwhKND9AurC/YC9D15W4MaIwwIURQGjzx3HLJaXDEM0KNDYSoAJQE
+Rw2XVoRKK88lZYwEjan1SgTpeFU5bNEQVbGeQDtrY90nWWKBYYsdpd5XngZmrbJa
+gOfYBVBGBqWY8CIRd5ouM5I5ZzsYxSbV0qNc2/sH/j/73l/LMaEtdV5aJYgmjFpL
+JaNEgJNOCYwzsIO2tlPIrp4u0OEQpcI8esiZ5iHOmx3UqT/yzTSRZm3TN77ZS/Wd
+vp+NM61fzjJuAa48VyhdrEPKLxHm0HaxqdGYJKTvY5YkXEtsqFFmiOD5LLZQxowQ
+SmqcTv4G5kkyCBt8sFQzgQMxj5w3xgNJmUiqjdFaasCV8IRLZYBoVnHrJHBQLIB1
+PMfbwbO6SeIyGbWTPE+c1LbfbwEdbh3d2yy2B8Wli4O8WcXW5et/1+31zeKYv/n2
+5c7i6+DWyacPZ783To9GH28Ux2Z1+9X47urBtc1T/Ovh6v73n08WfwA=
+=oGNM
+-----END PGP MESSAGE-----
+
+And finally, I am proving ownership of this host by posting or
+appending to this document.
+
+View my publicly-auditable identity here: https://keybase.io/cjw
+
+==================================================================
