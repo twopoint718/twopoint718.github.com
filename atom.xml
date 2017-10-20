@@ -8,8 +8,227 @@
         <name>Chris Wilson</name>
         <email>chris@sencjw.com</email>
     </author>
-    <updated>2015-01-08T00:00:00Z</updated>
+    <updated>2017-10-20T00:00:00Z</updated>
     <entry>
+    <title>Practical Haskell</title>
+    <link href="http://sencjw.com/posts/2017-10-20-practical-haskell.html" />
+    <id>http://sencjw.com/posts/2017-10-20-practical-haskell.html</id>
+    <published>2017-10-20T00:00:00Z</published>
+    <updated>2017-10-20T00:00:00Z</updated>
+    <summary type="html"><![CDATA[<article>
+  <header>
+    <h1>Practical Haskell</h1>
+    <p>
+      Posted on October 20, 2017
+      
+    </p>
+  </header>
+
+  <p>Alternate title: <em>A Haskell Talk That Would Definitely Be Rejected At a Functional Programming Conference</em></p>
+<p>First, for some background context, please go read <a href="https://www.snoyman.com/blog/2017/04/haskell-success-stories">Haskell Success Stories</a>.</p>
+<p>While it’s not true, there’s the perception out there that Haskell’s only good for doing math-y things. Got some high-finance doohickey that you need to write? Sure. Do you need to write a [Boring Line-of-business Application][]? Not so much. There are bits and pieces out there, but it can be tough to bring them together. Sometimes what you see is a novel encoding of a known problem but in a functional context. Like it could be show-and-tell about a functional data structure (many great articles fall into this category). Others are about getting a grip on some advanced technique, e.g. <em>free monads</em>, <em>lenses</em>, <em>profunctors</em>, etc. I love these sorts of articles! But others have written many and have written them much better than I could. I want to put out a few articles on how to accomplish some meat-and-potatoes software tasks.</p>
+<p>The three avenues I used when I started learning Haskell were: “Real World Haskell,” flailing around in the REPL endlessly, and reading blog posts. Maybe more than other languages, Haskell has a <em>distributed tutorial</em> that comprises a vast collection of programming blog posts <em>out there.</em> Collectively, these make up a lot of <em>The Literature</em>.</p>
+<p>One thing that I want to add to that corpus is <em>my take</em> on writing day-to-day Haskell code. This is the kind of thing that probably seems super mundane and not interesting to many Haskellers, and that’s okay. My audience here is people who have the impression that you can write a compiler with Haskell, but you can’t send an email. They may think Haskell is “good” but the unsaid follow-on thought is “…for problems I don’t have.” In blabbing about how I do some of those ordinary things, I want that person to come away thinking: “oh, it’s nice for my <em>regular</em> problems, too.”</p>
+<p>I’m hoping that this will be a series of posts where I can show several examples. The first one on the docket is something that always sort of bugged me in Ruby on Rails: “Job Scheduling.” Wikipedia has a <a href="https://en.wikipedia.org/wiki/Job_scheduler">longish page</a> about all the forms that that problem can take, but what I had in mind is the prototypical <a href="http://sidekiq.org/">Sidekiq</a> app. If you’ve never met Sidekiq it’s a job queuing system that uses Redis to persist descriptions of “jobs” to run. Later, in an entirely different <em>OS process</em>, Sidekiq pops jobs off the queue and then runs them.</p>
+<p>This is a pretty common thing for <em>The Business</em> to want. There are lots of tasks that need to get done but they don’t need to get done <em>now</em>. It is perfectly fine to push them off to the side and continue with some other workflow. This makes a lot of sense. The garden-variety Rails web application would get bogged down if it had to run a lengthy, I/O-intensive side-quest in the middle of a controller action. Enqueuing a job is a quick process, so that the synchronous web request can complete. Once a job is scheduled, a worker from the pool will pick it up anon.</p>
+<p>Let’s build a toy version of that.</p>
+<h2 id="jobscheduler.hs---queue-management">JobScheduler.hs - Queue Management</h2>
+<p>It’s been said that <a href="https://twitter.com/gabrielg439/status/701871069607505921">an idiomatic Haskell program is 20 lines of imports, 6 language extensions, and 1 line of Perl</a>. I cut through that thicket with a custom prelude, <code>Preamble</code>. You can go check it out if you’d like, but it’s just there to import and then re-export common libraries. Let’s start with some bookkeeping that we need for working with the queue itself:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">--------------------------</span>
+<span class="co">-- Data types</span>
+
+
+<span class="kw">type</span> <span class="dt">Task</span> <span class="fu">=</span> <span class="dt">Maybe</span> <span class="dt">JobParser.JobSpec</span>
+<span class="kw">type</span> <span class="dt">JobQueue</span> <span class="fu">=</span> <span class="dt">TChan</span> <span class="dt">Task</span>
+
+
+<span class="co">--------------------------</span>
+<span class="co">-- Functions</span>
+
+
+<span class="co">-- | Start up a worker pool of &#39;k&#39; members. Return the &#39;TChan&#39; that can be</span>
+<span class="co">-- used to assign work to the pool.</span>
+init<span class="ot"> ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">IO</span> <span class="dt">JobQueue</span>
+init k <span class="fu">=</span> <span class="kw">do</span>
+    reportQueue <span class="ot">&lt;-</span> newTChanIO
+    jobQueue <span class="ot">&lt;-</span> newTChanIO
+
+    <span class="co">-- start the report writer worker listening on the reportQueue</span>
+    _ <span class="ot">&lt;-</span> forkIO (reportWriter reportQueue)
+
+    <span class="co">-- start worker threads 1 through k, all listening on the jobQueue</span>
+    forM_ [<span class="dv">1</span><span class="fu">..</span>k] <span class="fu">$</span> \workerNum <span class="ot">-&gt;</span>
+        forkIO (worker reportQueue jobQueue workerNum)
+
+    <span class="co">-- return the jobQueue (so we can add jobs to it later)</span>
+    return jobQueue
+
+
+<span class="co">-- | Spam &#39;Nothing&#39; task into the job queue. When a worker receives a</span>
+<span class="co">-- &#39;Nothing&#39; &#39;Task&#39;, it will quit.</span>
+<span class="ot">shutdown ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">JobQueue</span> <span class="ot">-&gt;</span> <span class="dt">IO</span> ()
+shutdown k jobQueue <span class="fu">=</span> atomically <span class="fu">$</span>
+    replicateM_ k (writeTChan jobQueue <span class="dt">Nothing</span>)
+
+
+<span class="co">-- | Add a job to the queue specified by a &#39;JobParser.JobSpec&#39;.</span>
+<span class="ot">enqueue ::</span> <span class="dt">MonadIO</span> m <span class="ot">=&gt;</span> <span class="dt">JobParser.JobSpec</span> <span class="ot">-&gt;</span> <span class="dt">JobQueue</span> <span class="ot">-&gt;</span> m ()
+enqueue jobSpec jobQueue <span class="fu">=</span> liftIO <span class="fu">.</span> atomically <span class="fu">$</span>
+    writeTChan jobQueue (<span class="dt">Just</span> jobSpec)</code></pre></div>
+<p><code>init</code> creates the <code>JobQueue</code> itself and spawns <code>k</code> workers to watch the output of that queue. We’re using a <code>TChan Task</code> (a transactional channel that can carry <code>Task</code> values). This is a lot like a <a href="https://gobyexample.com/channels">Golang channel</a> except we additionally get transactional semantics around the reading and writing of the channel. For instance, we could read from one channel and write to another and wrap the whole thing in <code>atomically</code>. Outside of that block we’d only be able to observe both happen or neither happen. We also create a <code>reportQueue</code>/<code>reportWriter</code> which will asynchronously collect log messages and print them to the terminal.</p>
+<p><code>shutdown</code> sends <code>k</code> <em>quit</em> messages to the worker pool. When a worker receives a <code>Nothing</code> value, it’ll quit. This will terminate that worker’s thread.</p>
+<p>Lastly, <code>enqueue</code> writes a new job into the <code>jobQueue</code>. We’ll talk more about what a <code>JobSpec</code> is in a minute, but it’s really just a description of a job to run. We need to wrap the <code>jobSpec</code> in <code>Just</code> to distinguish it from <code>Nothing</code>, which would kill the worker thread.</p>
+<h2 id="jobscheduler.hs---workers-and-jobs">JobScheduler.hs - Workers and Jobs</h2>
+<p>Now that we’ve got our queue all prepped, we can handle jobs that come down the pike.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">-- | Watch the report queue for messages and write them to the terminal</span>
+<span class="ot">reportWriter ::</span> <span class="dt">TChan</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">IO</span> ()
+reportWriter chan <span class="fu">=</span>
+    forever <span class="fu">$</span> <span class="kw">do</span>
+        msg <span class="ot">&lt;-</span> atomically (readTChan chan)
+        putStrLn msg
+        hFlush stdout
+
+
+<span class="co">-- | Run a worker. It can write to the report queue and it can read from the</span>
+<span class="co">-- jobQueue. It is also assigned a sequential number as a label, so we</span>
+<span class="co">-- know it&#39;s &quot;worker 1,&quot; for example. The actual job is done in the</span>
+<span class="co">-- &#39;performJob&#39; helper. This prints the job&#39;s name from the &#39;JobSpec&#39;</span>
+<span class="co">-- and then waits the given duration in seconds. Then it prints that</span>
+<span class="co">-- it&#39;s finished.</span>
+<span class="ot">worker ::</span> <span class="dt">TChan</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">JobQueue</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">IO</span> ()
+worker reportQueue jobQueue workerNum <span class="fu">=</span> loop
+    <span class="kw">where</span>
+        loop <span class="fu">=</span> <span class="kw">do</span>
+            job <span class="ot">&lt;-</span> atomically (readTChan jobQueue)
+                <span class="kw">case</span> job <span class="kw">of</span>
+                    <span class="dt">Nothing</span> <span class="ot">-&gt;</span> return ()
+                    <span class="dt">Just</span> spec  <span class="ot">-&gt;</span> <span class="kw">do</span>
+                        performJob spec reportQueue workerNum
+                        loop
+
+
+<span class="co">-- | Actually perform the specified job. In this case we just sleep for</span>
+<span class="co">-- however long the job specifies.</span>
+<span class="ot">performJob ::</span> <span class="dt">JobParser.JobSpec</span> <span class="ot">-&gt;</span> <span class="dt">TChan</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">IO</span> ()
+performJob (<span class="dt">JobParser.JobSpec</span> name duration) reportQueue workerNum <span class="fu">=</span> <span class="kw">do</span>
+    <span class="kw">let</span> startMsg <span class="fu">=</span> printf <span class="st">&quot;WORKER %d STARTING JOB: %s&quot;</span> workerNum name
+        finishMsg <span class="fu">=</span> printf <span class="st">&quot;WORKER %d FINISHED: %s&quot;</span> workerNum name
+    atomically (writeTChan reportQueue startMsg)
+    threadDelay (<span class="dv">1000000</span> <span class="fu">*</span> duration)
+    atomically (writeTChan reportQueue finishMsg)</code></pre></div>
+<p>I mentioned briefly that we have a (sort of) parallel work queue for logging messages. This is the worker that deals with that queue. <code>reportWriter</code> loops forever, pulling <code>String</code> messages off the queue and writing them to the terminal. This seems trivial, but if we logged directly from the worker threads we’d sometimes get some Zalgo text instead of a sensible message. The threads could interleave in any order. We sidestep this by writing messages into a channel and then printing them in an orderly fashion.</p>
+<p>The <code>worker</code> is the central figure on stage. We bring together the <code>jobQueue</code>, the <code>reportQueue</code>, an <code>Int</code> (for identifying the worker, not really needed, but nice for logging), and handle jobs coming in through the queue. We loop forever pulling jobs off the queue. If the job’s value is <code>Nothing</code> then we’ll yield a value rather than looping again, this ends the thread. Otherwise, we extract the <code>JobSpec</code> and pass the resulting payload along to <code>performJob</code>. We then loop again.</p>
+<p><code>performJob</code> opens up the payload and performs the job. In my simulation here, the “job” such as it is, is just a number. This code announces to the world that it’s starting work, sleeps for that number of seconds, and then announces it’s done<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>.</p>
+<h2 id="jobparser.hs">JobParser.hs</h2>
+<p>Jobs are sent to the server in simple XML format like so:</p>
+<div class="sourceCode"><pre class="sourceCode xml"><code class="sourceCode xml"><span class="kw">&lt;?xml</span> version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;<span class="kw">?&gt;</span>
+<span class="kw">&lt;job&gt;</span>
+  <span class="kw">&lt;jobName&gt;</span>10-second job<span class="kw">&lt;/jobName&gt;</span>
+  <span class="kw">&lt;seconds&gt;</span>10<span class="kw">&lt;/seconds&gt;</span>
+<span class="kw">&lt;/job&gt;</span></code></pre></div>
+<p>JSON it ain’t, but I wanted to make this more Enterprisey, right? So let’s extract the juicy business data inside:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">-- | The job spec is the name and the duration of the job. Nothing too</span>
+<span class="co">-- weird. The duration is converted into an &#39;Int&#39;.</span>
+<span class="kw">data</span> <span class="dt">JobSpec</span> <span class="fu">=</span> <span class="dt">JobSpec</span>
+    {<span class="ot"> jobName     ::</span> <span class="dt">String</span>
+    ,<span class="ot"> jobDuration ::</span> <span class="dt">Int</span>
+    }
+
+
+<span class="co">-- | We convert from &#39;XmlSource&#39; which has instances for various</span>
+<span class="co">-- text-ual type things: &#39;String&#39;, &#39;ByteString&#39;, &#39;Text&#39;, etc. If parsing</span>
+<span class="co">-- succeeds we&#39;ll end up with a &#39;JobSpec&#39;. </span>
+<span class="ot">parseJob ::</span> <span class="dt">Lexer.XmlSource</span> s <span class="ot">=&gt;</span> s <span class="ot">-&gt;</span> <span class="dt">Maybe</span> <span class="dt">JobSpec</span>
+parseJob s <span class="fu">=</span> XML.parseXMLDoc s <span class="fu">&gt;&gt;=</span> getJob
+
+
+<span class="co">-- | Extract the &quot;jobName&quot; and &quot;seconds&quot; fields out of the XML document.</span>
+<span class="ot">getJob ::</span> <span class="dt">XML.Element</span> <span class="ot">-&gt;</span> <span class="dt">Maybe</span> <span class="dt">JobSpec</span>
+getJob el <span class="fu">=</span> liftA2 <span class="dt">JobSpec</span>
+    (XML.strContent <span class="fu">&lt;$&gt;</span> XML.filterChildName (byName <span class="st">&quot;jobName&quot;</span>) el)
+    (read <span class="fu">.</span> XML.strContent <span class="fu">&lt;$&gt;</span> XML.filterChildName (byName <span class="st">&quot;seconds&quot;</span>) el)
+
+
+<span class="co">-- | A helper function that will search by the name of the tag (rather</span>
+<span class="co">-- than attributes or other XML-y things).</span>
+<span class="ot">byName ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">XML.QName</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span>
+byName needle haystack <span class="fu">=</span> XML.qName haystack <span class="fu">==</span> needle</code></pre></div>
+<p>If you’re used to looking at parsing type code that shouldn’t look too different. Haskell’s typical style is to have a functon amounting to <code>TextBlob -&gt; Maybe BusinessBlob</code> somewhere. Even if this function is internally complex, the exterior API will examine unstructured input and give a thumbs up or down. The nice part about this, once you’ve tested your parser reasonably well, is that once input text passes muster then you don’t have to worry about it any longer. You go from opaque blob directly to a business domain object<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a> <em>or</em> a reason why you couldn’t.</p>
+<h2 id="web.hs---putting-it-together">Web.hs - Putting it Together</h2>
+<p>We tie the job queue together with the job specs by allowing them to be submitted via a POST. We have two routes, a bogus one just to make sure the webapp is up – if you like that sort of thing. The action happens when someone POSTS an XML JobSpec to <code>/upload</code>:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">app ::</span> <span class="dt">JobScheduler.JobQueue</span> <span class="ot">-&gt;</span> <span class="dt">Scotty.ScottyM</span> ()
+app jobQueue <span class="fu">=</span> <span class="kw">do</span>
+    Scotty.get <span class="st">&quot;/&quot;</span> <span class="fu">$</span>
+        Scotty.text <span class="st">&quot;hello&quot;</span>
+
+    <span class="co">-- upload action</span>
+    Scotty.post <span class="st">&quot;/upload&quot;</span> <span class="fu">$</span> <span class="kw">do</span>
+        maybeJobSpec <span class="ot">&lt;-</span> withUploadedFile JobParser.parseJob
+        maybeJobSpec <span class="ot">`or400`</span> \jobSpec <span class="ot">-&gt;</span> <span class="kw">do</span>
+            JobScheduler.enqueue jobSpec jobQueue
+            Scotty.status _200
+
+
+<span class="ot">withUploadedFile ::</span> (<span class="dt">BL.ByteString</span> <span class="ot">-&gt;</span> <span class="dt">Maybe</span> a) <span class="ot">-&gt;</span> <span class="dt">Scotty.ActionM</span> (<span class="dt">Maybe</span> a)
+withUploadedFile f <span class="fu">=</span> <span class="kw">do</span>
+    files <span class="ot">&lt;-</span> Scotty.files
+    <span class="kw">case</span> files <span class="kw">of</span>
+        [] <span class="ot">-&gt;</span> <span class="kw">do</span>                               <span class="co">-- no files uploaded</span>
+            Scotty.status _422
+            return <span class="dt">Nothing</span>
+        ((_, fileInfo)<span class="fu">:</span>_) <span class="ot">-&gt;</span>                   <span class="co">-- at least one file</span>
+            return (f (fileContent fileInfo))
+
+
+<span class="ot">or400 ::</span> <span class="dt">Maybe</span> a <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> <span class="dt">Scotty.ActionM</span> ()) <span class="ot">-&gt;</span> <span class="dt">Scotty.ActionM</span> ()
+or400 m f <span class="fu">=</span> maybe (Scotty.status _400) f m</code></pre></div>
+<p>First we try to extract an uploaded file from the HTTP POST. <code>withUploadedFile</code> is a helper function that takes care of this pattern. It rummages around where the uploaded files ought to be, if there are any, and returns a 422 status if one wasn’t found. If it does find at least one file then we extract the <code>fileContent</code> from that payload and pass it to the callback function, <code>f</code>. This function should expect to receive a <code>ByteString</code> and maybe return some value.</p>
+<p>Back in the <em>upload action</em>, we use this to compose the pedestrian workflow of “receive upload, check if it was <em>really</em> an upload, and then parse it, if indeed it’s parseable.” We use <code>or400</code> to handle the case when we couldn’t parse the XML, responding with an HTTP 400 if so. Otherwise, we have a real-live <code>jobSpec</code>. We <code>enqueue</code> it in the <code>jobQueue</code> and then respond with an HTTP 200.</p>
+<h2 id="main.hs---starting-the-queue-and-web-server">Main.hs - starting the queue and web server</h2>
+<p>Last thing to do is to start the thing!</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">main ::</span> <span class="dt">IO</span> ()
+main <span class="fu">=</span>
+  bracket (JobScheduler.init <span class="dv">4</span>) (JobScheduler.shutdown <span class="dv">4</span>) <span class="fu">$</span> \jobQueue <span class="ot">-&gt;</span>
+    scotty <span class="dv">8000</span> (Web.app jobQueue)</code></pre></div>
+<p>We’re using <code>bracket</code> to make sure that the job queue is properly started and cleaned up in case we abort somewhere. The pattern is that <code>init</code> returns the <em>resource</em> (<code>JobQueue</code>) <code>shutdown 4</code> has the, partially-applied, type <code>JobQueue -&gt; IO ()</code>. And the inner <em>action</em> is a function of <code>jobQueue</code> as well.</p>
+<pre><code>bracket :: IO a -&gt; (a -&gt; IO b) -&gt; (a -&gt; IO c) -&gt; IO c
+           ^^^^^   ^^^^^^^^^^^    ^^^^^^^^^^^
+             |          |              &#39;- use
+             |          &#39;- clean up
+             `- Acquire resource</code></pre>
+<p>And then we start the web app, passing in the <code>jobQueue</code> so that it’s available within. There you have it!</p>
+<h2 id="running-the-simulation">Running the “simulation”</h2>
+<p>Let’s take it for a spin. I’ll fire off a bunch of jobs and see how the system responds:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">for</span> <span class="fu">file</span> in <span class="kw">`</span><span class="fu">ls</span> *xml<span class="kw">`</span>
+<span class="kw">do</span>
+	<span class="ex">curl</span> -XPOST -F <span class="st">&quot;upload=@</span><span class="va">${file}</span><span class="st">&quot;</span> http://127.0.0.1:8000/upload
+	<span class="fu">sleep</span> 1
+<span class="kw">done</span></code></pre></div>
+<p>This submits each the five sample jobs at a 1 second interval. It isn’t that important, but I thought the simulation should suggest that new jobs can arrive at any time. And then we can check on the server to see how they’ve been processed:</p>
+<pre><code>WORKER 4 STARTING JOB: 10-second job
+WORKER 1 STARTING JOB: 15-second job
+WORKER 3 STARTING JOB: 20-second job
+WORKER 2 STARTING JOB: 2-second job
+WORKER 2 FINISHED: 2-second job
+WORKER 2 STARTING JOB: 5-second job
+WORKER 4 FINISHED: 10-second job
+WORKER 2 FINISHED: 5-second job
+WORKER 1 FINISHED: 15-second job
+WORKER 3 FINISHED: 20-second job</code></pre>
+<p>An interesting thing to note is that there are 5 jobs but only 4 workers. We can see this in the trace. When WORKER 2 finishes the 2-second job, the 5-second job is waiting in the queue. WORKER 2 then picks up the 5-second job and continues. These jobs are on a simple fixed timer, but you could imagine each job taking a variable amount of processing time before finishing.</p>
+<h2 id="full-example">Full example</h2>
+<p>You can check out the full code here: <a href="https://github.com/twopoint718/job-scheduler" class="uri">https://github.com/twopoint718/job-scheduler</a></p>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>The <em>modus operandi</em> of the ideal programmer, amirite?<a href="#fnref1">↩</a></p></li>
+<li id="fn2"><p>In reality, you’ll probably go to a <a href="https://en.wikipedia.org/wiki/Data_transfer_object">DTO</a> rather than an internal domain datatype directly. Also, to be very clear I’m using <em>object</em> in a lowercase discussion kind of way and not an uppercase UML kind of way.<a href="#fnref2">↩</a></p></li>
+</ol>
+</div>
+</article>
+]]></summary>
+</entry>
+<entry>
     <title>The Quick Hack v. Developing Software</title>
     <link href="http://sencjw.com/posts/2015-01-08-the-quick-hack.html" />
     <id>http://sencjw.com/posts/2015-01-08-the-quick-hack.html</id>
@@ -192,7 +411,7 @@ view fnLens :: MonadReader Person m =&gt; m String</code></pre>
 <p>The above type signature is a bit wonky, but I think it captures what’s happening as the types unify. So it all boils down to something that extracts a <code>String</code> from a <code>Person</code>. But the intuition that is starting to grow for me is that Lenses let you use a carefully-chosen (i.e. <code>Const</code>) <code>Functor</code> to “smuggle” a value out of a bigger structure.</p>
 <h2 id="sunday">Sunday</h2>
 <p>I spent a lot of time on Sunday working on Joe Nelson’s <a href="https://github.com/begriffs/haskell-vim-now">haskell-vim-now</a> one-line Haskell Vim installer. Lots of people were excited about the prospect of having an easy-to-install Vim mode. I think that this has made a lot of progress. If you like Vim and want to do Haskell development, go install it now. If you want to just install it here, just run this:</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">curl</span> -o - https://raw.githubusercontent.com/begriffs/haskell-vim-now/master/install.sh <span class="kw">|</span> <span class="kw">bash</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">curl</span> -o - https://raw.githubusercontent.com/begriffs/haskell-vim-now/master/install.sh <span class="kw">|</span> <span class="fu">bash</span></code></pre></div>
 <p>But please see the <a href="https://github.com/begriffs/haskell-vim-now/blob/master/README.md">README</a> for keybindings and general tips on use. Also, if there is anything that you’d like to see included or revised, you are <a href="https://github.com/begriffs/haskell-vim-now/issues">invited to submit an issue</a>.</p>
 <p>I also spent some time talking with the <a href="https://snowdrift.coop">Snowdrift.coop</a> developers. This is a funding platform that seeks to crowdfund ongoing Free/Libre/Open Source projects. They have a nice <a href="https://snowdrift.coop/p/snowdrift/w/intro">intro</a>. The Haskell angle here is that this is a Yesod app: source <a href="https://github.com/dlthomas/snowdrift">on Github</a> and <a href="https://gitorious.org/snowdrift/snowdrift/source/6b587c9c176aa24917c7403dbadd3778e17d08b4:">on Gitorious</a>.</p>
 <h2 id="summary">Summary</h2>
@@ -224,7 +443,7 @@ view fnLens :: MonadReader Person m =&gt; m String</code></pre>
 <p>Getters:</p>
 <p>your basic “getter” is ^. (carrot-dot, aka “view”) It lets you “view” things:</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="co">-- basic &quot;Person&quot; data</span>
-<span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Person</span> <span class="fu">=</span> <span class="dt">Person</span> {_<span class="ot">fn::</span><span class="dt">String</span>, _<span class="ot">ln::</span><span class="dt">String</span>, _<span class="ot">email::</span><span class="dt">String</span>} <span class="kw">deriving</span> <span class="dt">Show</span>
+<span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Person</span> <span class="fu">=</span> <span class="dt">Person</span> {<span class="ot">_fn::</span><span class="dt">String</span>,<span class="ot"> _ln::</span><span class="dt">String</span>,<span class="ot"> _email::</span><span class="dt">String</span>} <span class="kw">deriving</span> <span class="dt">Show</span>
 <span class="ot">&gt;</span> 
 <span class="ot">&gt; me ::</span> <span class="dt">Person</span>
 <span class="ot">&gt;</span> me <span class="fu">=</span> <span class="dt">Person</span> {_fn<span class="fu">=</span><span class="st">&quot;Chris&quot;</span>, _ln<span class="fu">=</span><span class="st">&quot;Wilson&quot;</span>, _email<span class="fu">=</span><span class="st">&quot;chris@bendyworks.com&quot;</span>}
@@ -243,7 +462,7 @@ view fnLens :: MonadReader Person m =&gt; m String</code></pre>
 <span class="ot">&gt;</span> <span class="co">-- Person {_fn = &quot;Christopher&quot;, _ln = &quot;Wilson&quot;, _email = &quot;chris@bendyworks.com&quot;}</span></code></pre></div>
 <p>“But Chris!” you interject, “that’s just lame-o ‘.’ that’s in Ruby ALREADY! Show me some lazer-beam stuff!” Okay, lenses also do traversing! That is you can get/set a bunch of things at once:</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="co">-- bendyworks</span>
-<span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Bendyworks</span> <span class="fu">=</span> <span class="dt">Bendyworks</span> {_<span class="ot">employees::</span>[<span class="dt">Person</span>]} <span class="kw">deriving</span> <span class="dt">Show</span>
+<span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Bendyworks</span> <span class="fu">=</span> <span class="dt">Bendyworks</span> {<span class="ot">_employees::</span>[<span class="dt">Person</span>]} <span class="kw">deriving</span> <span class="dt">Show</span>
 <span class="ot">&gt;</span> <span class="fu">$</span>(makeLenses <span class="ch">&#39;&#39;</span><span class="dt">Bendyworks</span>)
 <span class="ot">&gt;</span> <span class="co">-- some setting up</span>
 <span class="ot">&gt;</span> bendy <span class="fu">=</span> <span class="dt">Bendyworks</span> {_employees <span class="fu">=</span>
@@ -330,26 +549,6 @@ view fnLens :: MonadReader Person m =&gt; m String</code></pre>
   </header>
 
   <p>As I continue my leisurely foray into the world of Haskell, I have come upon a bivouac of Haskellers near Chicago this weekend. Myself and a co-worker from the office will be attending the first-ever <a href="https://plus.google.com/events/cc4njkf8kh5aho6soboisv6c7rc">ChiHack</a>. Maybe I can get someone to explain <a href="http://www.mpi-sws.org/~skilpat/backpack/">Backpack</a> to me.</p>
-</article>
-]]></summary>
-</entry>
-<entry>
-    <title>reactive_record</title>
-    <link href="http://sencjw.com/posts/2013-10-03-reactive-record.html" />
-    <id>http://sencjw.com/posts/2013-10-03-reactive-record.html</id>
-    <published>2013-10-03T00:00:00Z</published>
-    <updated>2013-10-03T00:00:00Z</updated>
-    <summary type="html"><![CDATA[<article>
-  <header>
-    <h1>reactive_record</h1>
-    <p>
-      Posted on October  3, 2013
-      
-    </p>
-  </header>
-
-  <p>Just wanted to make a quick note that I have published my first gem, <a href="https://rubygems.org/gems/reactive_record">reactive_record</a>, on rubygems. It is a utility that lets you “export” constraints from your existing postgres database, creating Rails models.</p>
-<p>It is pretty early, but I have put in a lot of work and I hope that it is useful for your projects.</p>
 </article>
 ]]></summary>
 </entry>
