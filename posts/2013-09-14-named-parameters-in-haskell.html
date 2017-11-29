@@ -118,9 +118,9 @@ formatEmail p <span class="fu">=</span> printf <span class="st">&quot;&lt;%s&gt;
 <span class="kw">import </span><span class="dt">Control.Lens</span>
 <span class="kw">import </span><span class="dt">Text.Printf</span>
 
-<span class="kw">data</span> <span class="dt">Person</span> <span class="fu">=</span> <span class="dt">Person</span> { _<span class="ot">firstName ::</span> <span class="dt">String</span>
-                     , _<span class="ot">lastName ::</span> <span class="dt">String</span>
-                     , _<span class="ot">email ::</span> <span class="dt">String</span>
+<span class="kw">data</span> <span class="dt">Person</span> <span class="fu">=</span> <span class="dt">Person</span> {<span class="ot"> _firstName ::</span> <span class="dt">String</span>
+                     ,<span class="ot"> _lastName ::</span> <span class="dt">String</span>
+                     ,<span class="ot"> _email ::</span> <span class="dt">String</span>
                      }
 
 makeLenses <span class="ch">''</span><span class="dt">Person</span>
@@ -136,7 +136,7 @@ main <span class="fu">=</span> putStrLn <span class="fu">$</span> formatEmail (<
                      , _phone <span class="fu">=</span> <span class="dt">Phone</span> { _number <span class="fu">=</span> <span class="st">&quot;...&quot;</span>, _type <span class="fu">=</span> <span class="st">&quot;mobile&quot;</span> }
                      }
 
-<span class="kw">data</span> <span class="dt">Phone</span> <span class="fu">=</span> <span class="dt">Phone</span> { _<span class="ot">number ::</span> <span class="dt">String</span>, _<span class="ot">type ::</span> <span class="dt">String</span> }
+<span class="kw">data</span> <span class="dt">Phone</span> <span class="fu">=</span> <span class="dt">Phone</span> {<span class="ot"> _number ::</span> <span class="dt">String</span>,<span class="ot"> _type ::</span> <span class="dt">String</span> }
 
 chris<span class="fu">^.</span>phone<span class="fu">^.</span><span class="kw">type</span> <span class="co">-- equals &quot;mobile&quot;</span></code></pre></div>
 <p>So, in summary, I feel that lenses provide a credible solution to the named-record/non-positional/keyword arguments problem. Go forth and hack.</p>

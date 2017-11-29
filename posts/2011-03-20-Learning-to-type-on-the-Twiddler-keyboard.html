@@ -54,8 +54,8 @@
 <div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="im">import</span> random
 
 <span class="kw">def</span> all_from(target_list, input_list):
-    <span class="cf">for</span> c <span class="op">in</span> input_list:
-        <span class="cf">if</span> <span class="op">not</span> c <span class="op">in</span> target_list:
+    <span class="cf">for</span> c <span class="kw">in</span> input_list:
+        <span class="cf">if</span> <span class="kw">not</span> c <span class="kw">in</span> target_list:
             <span class="cf">return</span> <span class="va">False</span>
     <span class="cf">return</span> <span class="va">True</span>
 
@@ -73,8 +73,8 @@
 
 <span class="kw">def</span> search_words(words, key_set<span class="op">=</span>first_set):
     out <span class="op">=</span> []
-    <span class="cf">for</span> word <span class="op">in</span> words:
-        <span class="cf">if</span> key_set(word) <span class="op">and</span> <span class="bu">len</span>(word) <span class="op">&gt;</span> <span class="dv">1</span>:
+    <span class="cf">for</span> word <span class="kw">in</span> words:
+        <span class="cf">if</span> key_set(word) <span class="kw">and</span> <span class="bu">len</span>(word) <span class="op">&gt;</span> <span class="dv">1</span>:
             out.append(word)
     <span class="cf">return</span> out
 

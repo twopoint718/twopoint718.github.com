@@ -50,7 +50,7 @@
 <p>Getters:</p>
 <p>your basic “getter” is ^. (carrot-dot, aka “view”) It lets you “view” things:</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="co">-- basic &quot;Person&quot; data</span>
-<span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Person</span> <span class="fu">=</span> <span class="dt">Person</span> {_<span class="ot">fn::</span><span class="dt">String</span>, _<span class="ot">ln::</span><span class="dt">String</span>, _<span class="ot">email::</span><span class="dt">String</span>} <span class="kw">deriving</span> <span class="dt">Show</span>
+<span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Person</span> <span class="fu">=</span> <span class="dt">Person</span> {<span class="ot">_fn::</span><span class="dt">String</span>,<span class="ot"> _ln::</span><span class="dt">String</span>,<span class="ot"> _email::</span><span class="dt">String</span>} <span class="kw">deriving</span> <span class="dt">Show</span>
 <span class="ot">&gt;</span> 
 <span class="ot">&gt; me ::</span> <span class="dt">Person</span>
 <span class="ot">&gt;</span> me <span class="fu">=</span> <span class="dt">Person</span> {_fn<span class="fu">=</span><span class="st">&quot;Chris&quot;</span>, _ln<span class="fu">=</span><span class="st">&quot;Wilson&quot;</span>, _email<span class="fu">=</span><span class="st">&quot;chris@bendyworks.com&quot;</span>}
@@ -69,7 +69,7 @@
 <span class="ot">&gt;</span> <span class="co">-- Person {_fn = &quot;Christopher&quot;, _ln = &quot;Wilson&quot;, _email = &quot;chris@bendyworks.com&quot;}</span></code></pre></div>
 <p>“But Chris!” you interject, “that’s just lame-o ‘.’ that’s in Ruby ALREADY! Show me some lazer-beam stuff!” Okay, lenses also do traversing! That is you can get/set a bunch of things at once:</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="co">-- bendyworks</span>
-<span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Bendyworks</span> <span class="fu">=</span> <span class="dt">Bendyworks</span> {_<span class="ot">employees::</span>[<span class="dt">Person</span>]} <span class="kw">deriving</span> <span class="dt">Show</span>
+<span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Bendyworks</span> <span class="fu">=</span> <span class="dt">Bendyworks</span> {<span class="ot">_employees::</span>[<span class="dt">Person</span>]} <span class="kw">deriving</span> <span class="dt">Show</span>
 <span class="ot">&gt;</span> <span class="fu">$</span>(makeLenses <span class="ch">''</span><span class="dt">Bendyworks</span>)
 <span class="ot">&gt;</span> <span class="co">-- some setting up</span>
 <span class="ot">&gt;</span> bendy <span class="fu">=</span> <span class="dt">Bendyworks</span> {_employees <span class="fu">=</span>
