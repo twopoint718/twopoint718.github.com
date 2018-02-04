@@ -55,9 +55,46 @@
 <p>Please see <a href="talks.html">talks</a> for a list of all the talks I’ve given.</p>
 <h3 id="the-book">The Book</h3>
 <ul>
+<li><strong>Update 1/2018</strong>: All edits are in (and the MEAP has been updated). The book should be published by 3/2018 unless otherwise noted. Thanks for following along!</li>
 <li><strong>Update 11/2017</strong>: All manuscript chapters are available as a MEAP. I’m wrapping up on editing the last two chapters!</li>
 <li><strong>Update 6/2016</strong>: <a href="https://manning.com/books/the-transparent-web">The Transparent Web</a> is now available as a MEAP (early access book) from <a href="http://manning.com/">Manning Publications</a>!</li>
 </ul>
+<h3 id="citation">Citation</h3>
+<p><a class="copy-bibtex" href>Copy to clipboard</a></p>
+<textarea class="sourceCode bibtex" style="width: 100%; height: 180px">
+@book{wilson2018,
+     title = {The Transparent Web},
+     subtitle = {Functional, Reactive, Isomorphic},
+     author = {Wilson, Christopher J.},
+     year = {2018},
+     publisher = {Manning Publications},
+     isbn = {9781633430013}
+ }
+</textarea>
+<script>
+    var code = document.querySelector('textarea.sourceCode.bibtex');
+    var copyLink = document.querySelector('a.copy-bibtex');
+    copyLink.addEventListener('click', function(evt) {
+        evt.preventDefault();
+        code.select();
+        try {
+            var successful = document.execCommand('copy');
+            if (successful) {
+                copyLink.innerHTML = 'copied';
+            } else {
+                copyLink.innerHTML = 'could not copy';
+            }
+        } catch (err) {
+            copyLink.innerHTML = 'error, could not copy';
+        }
+        window.setTimeout(function() {
+                copyLink.innerHTML = 'Copy to clipboard';
+            },
+            1000
+        );
+    });
+</script>
+<p>Thanks for the citation!</p>
       </main>
 
     </div>
