@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>sencjw - Embedded Software</title>
+    <link rel="stylesheet" type="text/css" href="../css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="../css/default.css" />
+    <link rel="stylesheet" type="text/css" href="../css/syntax.css" />
+    <link href="../atom.xml" type="application/atom+xml" rel="alternate" />
+    <link href="../feed.rss" type="application/rss+xml" rel="alternate" />
+  </head>
+  <body>
+    <div class="content">
+
+      <header>
+        <h1>sencjw</h1>
+        <h2>a place I put stuff</h2>
+      </header>
+
+      <nav>
+        <ul>
+          <li><a href="../">Home</a></li>
+          <li><a href="../archive.html">Blog Archive</a></li>
+          <li><a href="../contact.html">Contact</a></li>
+          <li><a href="../interviews.html">Interviews</a></li>
+          <li><a href="../talks.html">Talks</a></li>
+          <li><a href="../the_square_root_of_christmas.html">The Square Root of Christmas</a></li>
+          <li><a href="../transparent_web.html">The Transparent Web (book)</a></li>
+          <li><a href="../writings.html">Writings</a></li>
+        </ul>
+      </nav>
+
+      <main>
+        <article>
+  <header>
+    <h1>Embedded Software</h1>
+    <p>
+      Posted on August 25, 2019
+      
+    </p>
+  </header>
+
+  <p>I’ve been really fascinated lately (last ~1 yr or so) by <em>embedded software</em>. In short, software that’s written to run on devices that are <em>tiny</em> by today’s standards. A typical microcontroller, say an ARM Cortex M4, may spec out as:</p>
+<ul>
+<li>80MHz 32-bit processor</li>
+<li>256KB <a href="https://en.wikipedia.org/wiki/Flash_memory">Flash</a></li>
+<li>32KB <a href="https://en.wikipedia.org/wiki/Static_random-access_memory">SRAM</a></li>
+<li>2KB <a href="https://en.wikipedia.org/wiki/EEPROM">EEPROM</a></li>
+</ul>
+<p>In short, not a whole lot of storage for your programs and <em>really</em> not a lot of RAM to work within. Plus, you may not have a ton of extra cycles in which to accomplish what you’d want to do. Everything about developing for these systems demands a style of work that is exceedingly parsimonious. And to Johnny or Julie web-dev, you’ll come across as a grubby ascetic howling from your mountain shack about <em>individual bytes!</em></p>
+<p>Okay. So what does one get in trade for all this digital self-deprivation? Two big features that I’ve noticed are:</p>
+<ul>
+<li>Low-latency and predictable timing</li>
+<li>Interacting with the real world</li>
+</ul>
+<h2 id="low-latency-and-predictable-timing">Low latency and predictable timing</h2>
+<p>An embedded system can react to input quickly largely because it isn’t doing anything else. The processor is humming along at its 80MHz, completing a cycle each 12.5 nanoseconds, when some event happens (lingo: “trigger an interrupt”). In a smallish number of cycles, code to handle that event can start running. The exact figure varies, but it’s quick: say 150-250ns. If you can set a flag or otherwise do simple operations then the whole interrupt may last only 500ns. This brings within reach the ability to run some bit of code at a megahertz rate. As far as us pokey humans are concerned, the system reacts instantly.</p>
+<p>For me, both as a software developer and consumer, this immediate responsiveness is a deeply satisfying aspect of embedded development. As a user, I love the idea that when I press a button something <em>happens</em> and that it happens <em>fast</em>. And as a creator, being able to accomplish this feat feels like a superpower.</p>
+<h2 id="interacting-with-the-real-world">Interacting with the real world</h2>
+<p>Speaking of a superpower, what could be more magical than being able to reach out of the digital world and poke bits into meatspace? Or the reverse, to sample what’s going on “out there” and react to it, computationally. A sensor reading becomes a byte in a register, all ready to work with.</p>
+<p>Astute readers now clear their throats:</p>
+<blockquote>
+<p>What about combining the <em>sampling</em> with the <em>poking</em>? And doing that over and over automatically to, like, <em>control</em> stuff?</p>
+</blockquote>
+<p>Yup. That is both emphatically <a href="https://en.wikipedia.org/wiki/Control_system">a thing</a> and <a href="https://en.wikipedia.org/wiki/Control_theory">really cool</a>. Cool.</p>
+<h2 id="ongoing">Ongoing</h2>
+<p>Anyway this is a thing that I think is pretty cool and I’ve been digging into it. As a fun kicker there’s lots of cross-pollination with other things that I also think are cool. While the term <em>Internet of Things</em> is reaching toxic levels of buzzwordiness, there’s a kernel of really neat stuff there. It’s extending the internet’s feelers and actuators into the real world. It involves radio protocols like WiFi, <a href="https://lora-alliance.org">LoRa</a>, <a href="https://en.wikipedia.org/wiki/Bluetooth_Low_Energy">BLE</a>, and <a href="https://www.rs-online.com/designspark/eleven-internet-of-things-iot-protocols-you-need-to-know-about">many others</a>. You can even use <a href="https://chirp.io">audio frequencies as your data transport</a>.</p>
+<p>As work on projects, I’ll write about them here. Or over on the tech blog.</p>
+</article>
+
+      </main>
+
+    </div>
+  </body>
+</html>
