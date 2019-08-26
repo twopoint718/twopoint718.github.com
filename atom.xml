@@ -8,8 +8,52 @@
         <name>Chris Wilson</name>
         <email>chris@sencjw.com</email>
     </author>
-    <updated>2018-01-22T00:00:00Z</updated>
+    <updated>2019-08-25T00:00:00Z</updated>
     <entry>
+    <title>Embedded Software</title>
+    <link href="http://sencjw.com/posts/2019-08-25-Embedded-software.html" />
+    <id>http://sencjw.com/posts/2019-08-25-Embedded-software.html</id>
+    <published>2019-08-25T00:00:00Z</published>
+    <updated>2019-08-25T00:00:00Z</updated>
+    <summary type="html"><![CDATA[<article>
+  <header>
+    <h1>Embedded Software</h1>
+    <p>
+      Posted on August 25, 2019
+      
+    </p>
+  </header>
+
+  <p>I’ve been really fascinated lately (last ~1 yr or so) by <em>embedded software</em>. In short, software that’s written to run on devices that are <em>tiny</em> by today’s standards. A typical microcontroller, say an ARM Cortex M4, may spec out as:</p>
+<ul>
+<li>80MHz 32-bit processor</li>
+<li>256KB <a href="https://en.wikipedia.org/wiki/Flash_memory">Flash</a></li>
+<li>32KB <a href="https://en.wikipedia.org/wiki/Static_random-access_memory">SRAM</a></li>
+<li>2KB <a href="https://en.wikipedia.org/wiki/EEPROM">EEPROM</a></li>
+</ul>
+<p>In short, not a whole lot of storage for your programs and <em>really</em> not a lot of RAM to work within. Plus, you may not have a ton of extra cycles in which to accomplish what you’d want to do. Everything about developing for these systems demands a style of work that is exceedingly parsimonious. And to Johnny or Julie web-dev, you’ll come across as a grubby ascetic howling from your mountain shack about <em>individual bytes!</em></p>
+<p>Okay. So what does one get in trade for all this digital self-deprivation? Two big features that I’ve noticed are:</p>
+<ul>
+<li>Low-latency and predictable timing</li>
+<li>Interacting with the real world</li>
+</ul>
+<h2 id="low-latency-and-predictable-timing">Low latency and predictable timing</h2>
+<p>An embedded system can react to input quickly largely because it isn’t doing anything else. The processor is humming along at its 80MHz, completing a cycle each 12.5 nanoseconds, when some event happens (lingo: “trigger an interrupt”). In a smallish number of cycles, code to handle that event can start running. The exact figure varies, but it’s quick: say 150-250ns. If you can set a flag or otherwise do simple operations then the whole interrupt may last only 500ns. This brings within reach the ability to run some bit of code at a megahertz rate. As far as us pokey humans are concerned, the system reacts instantly.</p>
+<p>For me, both as a software developer and consumer, this immediate responsiveness is a deeply satisfying aspect of embedded development. As a user, I love the idea that when I press a button something <em>happens</em> and that it happens <em>fast</em>. And as a creator, being able to accomplish this feat feels like a superpower.</p>
+<h2 id="interacting-with-the-real-world">Interacting with the real world</h2>
+<p>Speaking of a superpower, what could be more magical than being able to reach out of the digital world and poke bits into meatspace? Or the reverse, to sample what’s going on “out there” and react to it, computationally. A sensor reading becomes a byte in a register, all ready to work with.</p>
+<p>Astute readers now clear their throats:</p>
+<blockquote>
+<p>What about combining the <em>sampling</em> with the <em>poking</em>? And doing that over and over automatically to, like, <em>control</em> stuff?</p>
+</blockquote>
+<p>Yup. That is both emphatically <a href="https://en.wikipedia.org/wiki/Control_system">a thing</a> and <a href="https://en.wikipedia.org/wiki/Control_theory">really cool</a>. Cool.</p>
+<h2 id="ongoing">Ongoing</h2>
+<p>Anyway this is a thing that I think is pretty cool and I’ve been digging into it. As a fun kicker there’s lots of cross-pollination with other things that I also think are cool. While the term <em>Internet of Things</em> is reaching toxic levels of buzzwordiness, there’s a kernel of really neat stuff there. It’s extending the internet’s feelers and actuators into the real world. It involves radio protocols like WiFi, <a href="https://lora-alliance.org">LoRa</a>, <a href="https://en.wikipedia.org/wiki/Bluetooth_Low_Energy">BLE</a>, and <a href="https://www.rs-online.com/designspark/eleven-internet-of-things-iot-protocols-you-need-to-know-about">many others</a>. You can even use <a href="https://chirp.io">audio frequencies as your data transport</a>.</p>
+<p>As work on projects, I’ll write about them here. Or over on the tech blog.</p>
+</article>
+]]></summary>
+</entry>
+<entry>
     <title>The Onion Approach</title>
     <link href="http://sencjw.com/posts/2018-01-22-The-Onion-Approach.html" />
     <id>http://sencjw.com/posts/2018-01-22-The-Onion-Approach.html</id>
@@ -541,27 +585,6 @@ view fnLens :: MonadReader Person m =&gt; m String</code></pre>
 <p>Stay tuned for when he begins talking about how important unbroken stretches of time are for working on (programming). Feynman’s solution is to cultivate an aura of <em>irresponsibility</em> so that he’ll have time to do physics.</p>
 <iframe width="420" height="315" src="//www.youtube.com/embed/Bgaw9qe7DEE?start=2160" frameborder="0" allowfullscreen>
 </iframe>
-</article>
-]]></summary>
-</entry>
-<entry>
-    <title>A Working Computer</title>
-    <link href="http://sencjw.com/posts/2014-03-27-working-computer.html" />
-    <id>http://sencjw.com/posts/2014-03-27-working-computer.html</id>
-    <published>2014-03-27T00:00:00Z</published>
-    <updated>2014-03-27T00:00:00Z</updated>
-    <summary type="html"><![CDATA[<article>
-  <header>
-    <h1>A Working Computer</h1>
-    <p>
-      Posted on March 27, 2014
-      
-    </p>
-  </header>
-
-  <p>Just thought that I’d make a tiny little post here and mention that I got my <a href="http://www.nand2tetris.org/">nand2tetris</a> computer up and running. That is, I finished off the CPU (which has some tricky parts) and connected it up to the 32K ROM and the Memory (also screen and keyboard memory maps).</p>
-<p>I’m now at the point where I can begin implementing the software stack that the platform uses. I’ve started out by writing the assembler in Haskell. We’ll see how this goes.</p>
-<p>If this is the first you’re hearing about nand2tetris, and if additionally, you enjoy hardware-y sorts of things, then I can’t recommend this course enough. It has been like a light going on in my head for understanding how these <a href="https://www.youtube.com/watch?v=EKWGGDXe5MA">silly little computers</a> all around us work!</p>
 </article>
 ]]></summary>
 </entry>
