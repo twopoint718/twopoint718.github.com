@@ -42,29 +42,29 @@
   </header>
 
   <p>I’ve been playing around with Plan 9 from Bell Labs a bunch lately. It takes the Unix idea that everything should have a file-like interface and runs with that to its logical (and surprisingly useful) extreme. It seems like a system that hangs together really well and has the feeling that it was actually designed, rather than grown. But that’s enough about that. What I wanted to mention was a script, <code>bundle(1)</code>, that I found to be really useful. So, use the source, Luke!, and then I’ll say something about it:</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co">#!/bin/sh</span>
-<span class="bu">echo</span> <span class="st">'# To unbundle, run this file'</span>
-<span class="kw">for</span> <span class="ex">i</span>
-<span class="kw">do</span>
-    <span class="bu">echo</span> <span class="st">&quot;echo </span><span class="va">$i</span><span class="st">&quot;</span>
-    <span class="bu">echo</span> <span class="st">&quot;sed 's/.//' &gt;</span><span class="va">$i</span><span class="st"> &lt;&lt;'//GO.SYSIN DD </span><span class="va">$i</span><span class="st">'&quot;</span>
-    <span class="fu">sed</span> <span class="st">&quot;s/^/-/&quot;</span> <span class="va">$i</span>
-    <span class="bu">echo</span> <span class="st">&quot;//GO.SYSIN DD </span><span class="va">$i</span><span class="st">&quot;</span>
-<span class="kw">done</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb1-1" title="1"><span class="co">#!/bin/sh</span></a>
+<a class="sourceLine" id="cb1-2" title="2"><span class="bu">echo</span> <span class="st">'# To unbundle, run this file'</span></a>
+<a class="sourceLine" id="cb1-3" title="3"><span class="kw">for</span> <span class="ex">i</span></a>
+<a class="sourceLine" id="cb1-4" title="4"><span class="kw">do</span></a>
+<a class="sourceLine" id="cb1-5" title="5">    <span class="bu">echo</span> <span class="st">&quot;echo </span><span class="va">$i</span><span class="st">&quot;</span></a>
+<a class="sourceLine" id="cb1-6" title="6">    <span class="bu">echo</span> <span class="st">&quot;sed 's/.//' &gt;</span><span class="va">$i</span><span class="st"> &lt;&lt;'//GO.SYSIN DD </span><span class="va">$i</span><span class="st">'&quot;</span></a>
+<a class="sourceLine" id="cb1-7" title="7">    <span class="fu">sed</span> <span class="st">&quot;s/^/-/&quot;</span> <span class="va">$i</span></a>
+<a class="sourceLine" id="cb1-8" title="8">    <span class="bu">echo</span> <span class="st">&quot;//GO.SYSIN DD </span><span class="va">$i</span><span class="st">&quot;</span></a>
+<a class="sourceLine" id="cb1-9" title="9"><span class="kw">done</span></a></code></pre></div>
 <p>Cool huh? It’s kinda meta but here’s what it does: when you run it like <code>bundle file1 file2 &gt; regen.sh</code> it outputs a script that when run will recreate <code>file1</code> and <code>file2</code>. It does this with a few applications of sed. Using <code>file1</code> and <code>file2</code> as examples, say I have <code>file1</code>’s contents:</p>
 <pre><code>hello</code></pre>
 <p>and file2 is:</p>
 <pre><code>world!</code></pre>
 <p>after running bundle with these two files the contents of regen.sh will look like this:</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co"># To unbundle, run this file</span>
-<span class="bu">echo</span> file1
-<span class="fu">sed</span> <span class="st">'s/.//'</span> <span class="op">&gt;</span> file1 <span class="op">&lt;&lt;'//GO.SYSIN</span> <span class="ex">DD</span> file1<span class="st">'</span>
-<span class="st">-hello</span>
-<span class="st">//GO.SYSIN DD file1</span>
-<span class="st">echo file2</span>
-<span class="st">sed '</span>s/.//<span class="st">' &gt; file2 &lt;&lt;'</span>//GO.SYSIN DD file2<span class="st">'</span>
-<span class="st">-world!</span>
-<span class="st">//GO.SYSIN DD file2</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb4-1" title="1"><span class="co"># To unbundle, run this file</span></a>
+<a class="sourceLine" id="cb4-2" title="2"><span class="bu">echo</span> file1</a>
+<a class="sourceLine" id="cb4-3" title="3"><span class="fu">sed</span> <span class="st">'s/.//'</span> <span class="op">&gt;</span> file1 <span class="op">&lt;&lt;'//GO.SYSIN</span> <span class="ex">DD</span> file1<span class="st">'</span></a>
+<a class="sourceLine" id="cb4-4" title="4"><span class="st">-hello</span></a>
+<a class="sourceLine" id="cb4-5" title="5"><span class="st">//GO.SYSIN DD file1</span></a>
+<a class="sourceLine" id="cb4-6" title="6"><span class="st">echo file2</span></a>
+<a class="sourceLine" id="cb4-7" title="7"><span class="st">sed '</span>s/.//<span class="st">' &gt; file2 &lt;&lt;'</span>//GO.SYSIN DD file2<span class="st">'</span></a>
+<a class="sourceLine" id="cb4-8" title="8"><span class="st">-world!</span></a>
+<a class="sourceLine" id="cb4-9" title="9"><span class="st">//GO.SYSIN DD file2</span></a></code></pre></div>
 <p>so, if you run this file, it prints “file1” and “file2” to the terminal, but then writes “hello” and “world” to file1 and file2, respectively (after having stripped the “-” off of each line using sed). So this is a neat little way to package up a bunch of text-ish files into a single “self-expanding” package.</p>
 </article>
 

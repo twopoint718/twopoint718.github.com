@@ -43,55 +43,55 @@
 
   <p><em>Note:</em> This is a short commentary on the new <a href="http://www.serpentine.com/wreq/">wreq library</a>. These comments were directed at my coworkers, but I thought they’d be interesting here. This post is literate Haskell, you should be able to cut-n-paste.</p>
 <hr />
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="ot">{-# LANGUAGE TemplateHaskell #-}</span>
-<span class="ot">&gt;</span> <span class="kw">module</span> <span class="dt">Main</span> <span class="kw">where</span>
-<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Control.Lens</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode literate haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb1-1" title="1"><span class="ot">{-# LANGUAGE TemplateHaskell #-}</span></a>
+<a class="sourceLine" id="cb1-2" title="2"><span class="kw">module</span> <span class="dt">Main</span> <span class="kw">where</span></a>
+<a class="sourceLine" id="cb1-3" title="3"><span class="kw">import</span> <span class="dt">Control.Lens</span></a></code></pre></div>
 <p>I think a big reason why I’m so stoked about this is that it’s a solid library that’s offering a lens-based API (something that I think will show up more and more as time goes on). I’m still digging into them, but lenses are sort of like the “.” (dot) from Ruby, but implemented as a library and infinitely more flexible:</p>
 <p>Getters:</p>
 <p>your basic “getter” is ^. (carrot-dot, aka “view”) It lets you “view” things:</p>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="co">-- basic &quot;Person&quot; data</span>
-<span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Person</span> <span class="fu">=</span> <span class="dt">Person</span> {<span class="ot">_fn::</span><span class="dt">String</span>,<span class="ot"> _ln::</span><span class="dt">String</span>,<span class="ot"> _email::</span><span class="dt">String</span>} <span class="kw">deriving</span> <span class="dt">Show</span>
-<span class="ot">&gt;</span> 
-<span class="ot">&gt; me ::</span> <span class="dt">Person</span>
-<span class="ot">&gt;</span> me <span class="fu">=</span> <span class="dt">Person</span> {_fn<span class="fu">=</span><span class="st">&quot;Chris&quot;</span>, _ln<span class="fu">=</span><span class="st">&quot;Wilson&quot;</span>, _email<span class="fu">=</span><span class="st">&quot;chris@bendyworks.com&quot;</span>}
-<span class="ot">&gt;</span> 
-<span class="ot">&gt;</span> <span class="fu">$</span>(makeLenses <span class="ch">''</span><span class="dt">Person</span>) <span class="co">-- autogen the getters/setters</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode literate haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb2-1" title="1"><span class="co">-- basic &quot;Person&quot; data</span></a>
+<a class="sourceLine" id="cb2-2" title="2"><span class="kw">data</span> <span class="dt">Person</span> <span class="fu">=</span> <span class="dt">Person</span> {<span class="ot">_fn::</span><span class="dt">String</span>,<span class="ot"> _ln::</span><span class="dt">String</span>,<span class="ot"> _email::</span><span class="dt">String</span>} <span class="kw">deriving</span> <span class="dt">Show</span></a>
+<a class="sourceLine" id="cb2-3" title="3"></a>
+<a class="sourceLine" id="cb2-4" title="4"><span class="ot">me ::</span> <span class="dt">Person</span></a>
+<a class="sourceLine" id="cb2-5" title="5">me <span class="fu">=</span> <span class="dt">Person</span> {_fn<span class="fu">=</span><span class="st">&quot;Chris&quot;</span>, _ln<span class="fu">=</span><span class="st">&quot;Wilson&quot;</span>, _email<span class="fu">=</span><span class="st">&quot;chris@bendyworks.com&quot;</span>}</a>
+<a class="sourceLine" id="cb2-6" title="6"></a>
+<a class="sourceLine" id="cb2-7" title="7"><span class="fu">$</span>(makeLenses '<span class="dt">'Person</span>) <span class="co">-- autogen the getters/setters</span></a></code></pre></div>
 <p>And using it to view inside the Person datatype:</p>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> ex1 <span class="fu">=</span> me<span class="fu">^.</span>fn
-<span class="ot">&gt;</span> <span class="co">-- &quot;Chris&quot;</span>
-<span class="ot">&gt;</span> ex2 <span class="fu">=</span> me<span class="fu">^.</span>email
-<span class="ot">&gt;</span> <span class="co">-- &quot;chris@bendyworks.com&quot;</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode literate haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb3-1" title="1">ex1 <span class="fu">=</span> me<span class="fu">^.</span>fn</a>
+<a class="sourceLine" id="cb3-2" title="2"><span class="co">-- &quot;Chris&quot;</span></a>
+<a class="sourceLine" id="cb3-3" title="3">ex2 <span class="fu">=</span> me<span class="fu">^.</span>email</a>
+<a class="sourceLine" id="cb3-4" title="4"><span class="co">-- &quot;chris@bendyworks.com&quot;</span></a></code></pre></div>
 <p>Next you’ve got your “setter” (it just updates, non-destructively returning a new thing), also called “set”:</p>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> ex3 <span class="fu">=</span> set fn <span class="st">&quot;Christopher&quot;</span> me
-<span class="ot">&gt;</span> <span class="co">-- Person {_fn = &quot;Christopher&quot;, _ln = &quot;Wilson&quot;, _email = &quot;chris@bendyworks.com&quot;}</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode literate haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb4-1" title="1">ex3 <span class="fu">=</span> set fn <span class="st">&quot;Christopher&quot;</span> me</a>
+<a class="sourceLine" id="cb4-2" title="2"><span class="co">-- Person {_fn = &quot;Christopher&quot;, _ln = &quot;Wilson&quot;, _email = &quot;chris@bendyworks.com&quot;}</span></a></code></pre></div>
 <p>or saying it with operators (the &amp; above is reverse function application, the function on the right is applied to the data on the left, kinda like a shell pipeline):</p>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> ex4 <span class="fu">=</span> me <span class="fu">&amp;</span> fn<span class="fu">.~</span><span class="st">&quot;Christopher&quot;</span>
-<span class="ot">&gt;</span> <span class="co">-- Person {_fn = &quot;Christopher&quot;, _ln = &quot;Wilson&quot;, _email = &quot;chris@bendyworks.com&quot;}</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode literate haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb5-1" title="1">ex4 <span class="fu">=</span> me <span class="fu">&amp;</span> fn<span class="fu">.~</span><span class="st">&quot;Christopher&quot;</span></a>
+<a class="sourceLine" id="cb5-2" title="2"><span class="co">-- Person {_fn = &quot;Christopher&quot;, _ln = &quot;Wilson&quot;, _email = &quot;chris@bendyworks.com&quot;}</span></a></code></pre></div>
 <p>“But Chris!” you interject, “that’s just lame-o ‘.’ that’s in Ruby ALREADY! Show me some lazer-beam stuff!” Okay, lenses also do traversing! That is you can get/set a bunch of things at once:</p>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="co">-- bendyworks</span>
-<span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Bendyworks</span> <span class="fu">=</span> <span class="dt">Bendyworks</span> {<span class="ot">_employees::</span>[<span class="dt">Person</span>]} <span class="kw">deriving</span> <span class="dt">Show</span>
-<span class="ot">&gt;</span> <span class="fu">$</span>(makeLenses <span class="ch">''</span><span class="dt">Bendyworks</span>)
-<span class="ot">&gt;</span> <span class="co">-- some setting up</span>
-<span class="ot">&gt;</span> bendy <span class="fu">=</span> <span class="dt">Bendyworks</span> {_employees <span class="fu">=</span>
-<span class="ot">&gt;</span>     [ <span class="dt">Person</span> <span class="st">&quot;Amy&quot;</span> <span class="st">&quot;Unger&quot;</span> <span class="st">&quot;amy@bendyworks.com&quot;</span>
-<span class="ot">&gt;</span>     <span class="co">-- ...</span>
-<span class="ot">&gt;</span>     , <span class="dt">Person</span> <span class="st">&quot;Will&quot;</span> <span class="st">&quot;Strinz&quot;</span> <span class="st">&quot;will@bendyworks.com&quot;</span>
-<span class="ot">&gt;</span>     ]} <span class="co">-- all employees (imagine)</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode literate haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb6-1" title="1"><span class="co">-- bendyworks</span></a>
+<a class="sourceLine" id="cb6-2" title="2"><span class="kw">data</span> <span class="dt">Bendyworks</span> <span class="fu">=</span> <span class="dt">Bendyworks</span> {<span class="ot">_employees::</span>[<span class="dt">Person</span>]} <span class="kw">deriving</span> <span class="dt">Show</span></a>
+<a class="sourceLine" id="cb6-3" title="3"><span class="fu">$</span>(makeLenses '<span class="dt">'Bendyworks</span>)</a>
+<a class="sourceLine" id="cb6-4" title="4"><span class="co">-- some setting up</span></a>
+<a class="sourceLine" id="cb6-5" title="5">bendy <span class="fu">=</span> <span class="dt">Bendyworks</span> {_employees <span class="fu">=</span></a>
+<a class="sourceLine" id="cb6-6" title="6">    [ <span class="dt">Person</span> <span class="st">&quot;Amy&quot;</span> <span class="st">&quot;Unger&quot;</span> <span class="st">&quot;amy@bendyworks.com&quot;</span></a>
+<a class="sourceLine" id="cb6-7" title="7">    <span class="co">-- ...</span></a>
+<a class="sourceLine" id="cb6-8" title="8">    , <span class="dt">Person</span> <span class="st">&quot;Will&quot;</span> <span class="st">&quot;Strinz&quot;</span> <span class="st">&quot;will@bendyworks.com&quot;</span></a>
+<a class="sourceLine" id="cb6-9" title="9">    ]} <span class="co">-- all employees (imagine)</span></a></code></pre></div>
 <p>Now we traverse over the employees field of the Bendyworks structure, and we can compose a getter with that!</p>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> ex5 <span class="fu">=</span> bendy <span class="fu">^..</span> employees<span class="fu">.</span>traversed<span class="fu">.</span>fn
-<span class="ot">&gt;</span> <span class="co">-- [&quot;Amy&quot;, ..., &quot;Will&quot;]</span>
-<span class="ot">&gt;</span> 
-<span class="ot">&gt;</span> ex6 <span class="fu">=</span> bendy <span class="fu">^..</span> employees<span class="fu">.</span>traversed<span class="fu">.</span>email
-<span class="ot">&gt;</span> <span class="co">-- [&quot;amy@bendyworks.com&quot;, ..., &quot;will@bendyworks.com&quot;]</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode literate haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb7-1" title="1">ex5 <span class="fu">=</span> bendy <span class="fu">^..</span> employees<span class="fu">.</span>traversed<span class="fu">.</span>fn</a>
+<a class="sourceLine" id="cb7-2" title="2"><span class="co">-- [&quot;Amy&quot;, ..., &quot;Will&quot;]</span></a>
+<a class="sourceLine" id="cb7-3" title="3"></a>
+<a class="sourceLine" id="cb7-4" title="4">ex6 <span class="fu">=</span> bendy <span class="fu">^..</span> employees<span class="fu">.</span>traversed<span class="fu">.</span>email</a>
+<a class="sourceLine" id="cb7-5" title="5"><span class="co">-- [&quot;amy@bendyworks.com&quot;, ..., &quot;will@bendyworks.com&quot;]</span></a></code></pre></div>
 <p>The thing that’s kinda cool is that “employees.traversed.fn” forms a sort-of lens on the whole Bendyworks datatype, letting us walk over it and pull out values. The traversal is a first-class thing (those ’.’s in the name are just plain-old function composition!). We can store it and use it as a new accessor:</p>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; emails ::</span> <span class="dt">Traversal'</span> <span class="dt">Bendyworks</span> <span class="dt">String</span>
-<span class="ot">&gt;</span> emails <span class="fu">=</span> employees<span class="fu">.</span>traversed<span class="fu">.</span>email
-<span class="ot">&gt;</span> 
-<span class="ot">&gt;</span> ex7 <span class="fu">=</span> bendy <span class="fu">^..</span> emails
-<span class="ot">&gt;</span> <span class="co">-- [...] -- just like above</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode literate haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb8-1" title="1"><span class="ot">emails ::</span> <span class="dt">Traversal'</span> <span class="dt">Bendyworks</span> <span class="dt">String</span></a>
+<a class="sourceLine" id="cb8-2" title="2">emails <span class="fu">=</span> employees<span class="fu">.</span>traversed<span class="fu">.</span>email</a>
+<a class="sourceLine" id="cb8-3" title="3"></a>
+<a class="sourceLine" id="cb8-4" title="4">ex7 <span class="fu">=</span> bendy <span class="fu">^..</span> emails</a>
+<a class="sourceLine" id="cb8-5" title="5"><span class="co">-- [...] -- just like above</span></a></code></pre></div>
 <p>They’re really composable! You can set a traversal with your old friend .~ (set):</p>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> ex8 <span class="fu">=</span> bendy <span class="fu">&amp;</span> emails <span class="fu">.~</span> <span class="st">&quot;[HIDDEN]&quot;</span>
-<span class="ot">&gt;</span> <span class="co">-- Bendyworks {_employees = [Person {_fn=&quot;Amy&quot;,...,_email=&quot;[HIDDEN]&quot;}, ...]}</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode literate haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb9-1" title="1">ex8 <span class="fu">=</span> bendy <span class="fu">&amp;</span> emails <span class="fu">.~</span> <span class="st">&quot;[HIDDEN]&quot;</span></a>
+<a class="sourceLine" id="cb9-2" title="2"><span class="co">-- Bendyworks {_employees = [Person {_fn=&quot;Amy&quot;,...,_email=&quot;[HIDDEN]&quot;}, ...]}</span></a></code></pre></div>
 <p>That’s simultaneously setting the emails of all Bendyworkers to the string “[HIDDEN]”. Notice how, if you squint, it’s like the .~ is a SUPER-DOT that can set a bunch of stuff at once. I think it is way cool. I’m just starting to look at the lens library and it’s big. There are tons of functions in there and a lot ground covered. But I think that as time goes on this will become pretty common. Functional getters and setters FTW!</p>
 </article>
 

@@ -43,7 +43,7 @@
 
   <p>I recently got a twiddler chorded keyboard (I love it). My two main goals with it are to be able to use it while doing things like giving talks, because it is like having one of those presentation clickers yet at the same time being able to competently type with it. And the second goal is to use it on my smartphone as a better alternative to the on-screen keyboard. I just want to make a little aside on the second goal. It’s not totally clear to me how to use an external USB keyboard with Android (though I have some leads) but things look generally promising.</p>
 <p>Either use, of course, assumes that I can type on the crazy thing. I’m one of those people that find it fun to try and re-wire my brain to do new things and I figure that if I switched to dvorak (and have been using it for about 10 years) that I can tackle this thing! I decided to do some drills with the Twiddler so that I get to the point where I can use it for day-to-day stuff, from then on it’ll bootstrap itself through frequent use. That, by the way, was roughly my technique for learning dvorak back in the day</p>
-<ol style="list-style-type: decimal">
+<ol type="1">
 <li>Print out the layout and tape it up at eye-level, this breaks you of the habit of looking at the keys (they won’t help you if you remap the keyboard in software)</li>
 <li>Do simple drills of the home row (this is great on Dvorak because you can form TONS of words)</li>
 <li>Expand the drills to less frequently used letters and characters</li>
@@ -51,47 +51,47 @@
 <li>Do this daily or almost-daily for about 4-8 weeks (that’s about how long it took me to match and then exceed my QWERTY speed)</li>
 </ol>
 <p>To deal with steps 2 and 3 on the twiddler, I wrote this short python script that pulls words out out /usr/share/dict/words that can be typed without any chord (open), using the first chord key (1st or “L”), and finally the second chord key (2nd or “M”). I don’t have the third chord key on here because using just the first and second is sufficient for all letters. Here’s the script:</p>
-<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="im">import</span> random
-
-<span class="kw">def</span> all_from(target_list, input_list):
-    <span class="cf">for</span> c <span class="kw">in</span> input_list:
-        <span class="cf">if</span> <span class="kw">not</span> c <span class="kw">in</span> target_list:
-            <span class="cf">return</span> <span class="va">False</span>
-    <span class="cf">return</span> <span class="va">True</span>
-
-<span class="kw">def</span> first_set(input_word):
-    <span class="cf">return</span> all_from(<span class="st">&quot;abcdefghABCDEFGH&quot;</span>, input_word)
-
-<span class="kw">def</span> second_set(input_word):
-    <span class="cf">return</span> all_from(<span class="st">&quot;ijklmnopqIJKLMNOPQ&quot;</span>, input_word)
-
-<span class="kw">def</span> third_set(input_word):
-    <span class="cf">return</span> all_from(<span class="st">&quot;rstuvwxyzRSTUVWXYZ&quot;</span>, input_word)
-
-<span class="kw">def</span> fourth_set(input_word):
-    <span class="cf">return</span> all_from(<span class="st">&quot;.,;'</span><span class="ch">\&quot;</span><span class="st">?!-&quot;</span>, input_word)
-
-<span class="kw">def</span> search_words(words, key_set<span class="op">=</span>first_set):
-    out <span class="op">=</span> []
-    <span class="cf">for</span> word <span class="kw">in</span> words:
-        <span class="cf">if</span> key_set(word) <span class="kw">and</span> <span class="bu">len</span>(word) <span class="op">&gt;</span> <span class="dv">1</span>:
-            out.append(word)
-    <span class="cf">return</span> out
-
-<span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">&quot;__main__&quot;</span>:
-    get_words <span class="op">=</span> <span class="dv">10</span>
-    fname <span class="op">=</span> <span class="st">&quot;/usr/share/dict/words&quot;</span>
-    wordlist <span class="op">=</span> <span class="bu">open</span>(fname, <span class="st">&quot;r&quot;</span>).read().split(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)
-
-    first <span class="op">=</span> search_words(wordlist, first_set)
-    second <span class="op">=</span> search_words(wordlist, second_set)
-    third <span class="op">=</span> search_words(wordlist, third_set)
-    <span class="co">#fourth = search_words(wordlist, fourth_set) # need wordlist w/ punct.</span>
-
-    <span class="bu">print</span> <span class="st">&quot;open: &quot;</span>, <span class="st">&quot; &quot;</span>.join(random.sample(first, get_words))
-    <span class="bu">print</span> <span class="st">&quot;1st:  &quot;</span>, <span class="st">&quot; &quot;</span>.join(random.sample(second, get_words))
-    <span class="bu">print</span> <span class="st">&quot;2nd:  &quot;</span>, <span class="st">&quot; &quot;</span>.join(random.sample(third, get_words))
-    <span class="co">#print &quot;3rd:  &quot;, &quot; &quot;.join(random.sample(fourth, get_words))</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><a class="sourceLine" id="cb1-1" title="1"><span class="im">import</span> random</a>
+<a class="sourceLine" id="cb1-2" title="2"></a>
+<a class="sourceLine" id="cb1-3" title="3"><span class="kw">def</span> all_from(target_list, input_list):</a>
+<a class="sourceLine" id="cb1-4" title="4">    <span class="cf">for</span> c <span class="kw">in</span> input_list:</a>
+<a class="sourceLine" id="cb1-5" title="5">        <span class="cf">if</span> <span class="kw">not</span> c <span class="kw">in</span> target_list:</a>
+<a class="sourceLine" id="cb1-6" title="6">            <span class="cf">return</span> <span class="va">False</span></a>
+<a class="sourceLine" id="cb1-7" title="7">    <span class="cf">return</span> <span class="va">True</span></a>
+<a class="sourceLine" id="cb1-8" title="8"></a>
+<a class="sourceLine" id="cb1-9" title="9"><span class="kw">def</span> first_set(input_word):</a>
+<a class="sourceLine" id="cb1-10" title="10">    <span class="cf">return</span> all_from(<span class="st">&quot;abcdefghABCDEFGH&quot;</span>, input_word)</a>
+<a class="sourceLine" id="cb1-11" title="11"></a>
+<a class="sourceLine" id="cb1-12" title="12"><span class="kw">def</span> second_set(input_word):</a>
+<a class="sourceLine" id="cb1-13" title="13">    <span class="cf">return</span> all_from(<span class="st">&quot;ijklmnopqIJKLMNOPQ&quot;</span>, input_word)</a>
+<a class="sourceLine" id="cb1-14" title="14"></a>
+<a class="sourceLine" id="cb1-15" title="15"><span class="kw">def</span> third_set(input_word):</a>
+<a class="sourceLine" id="cb1-16" title="16">    <span class="cf">return</span> all_from(<span class="st">&quot;rstuvwxyzRSTUVWXYZ&quot;</span>, input_word)</a>
+<a class="sourceLine" id="cb1-17" title="17"></a>
+<a class="sourceLine" id="cb1-18" title="18"><span class="kw">def</span> fourth_set(input_word):</a>
+<a class="sourceLine" id="cb1-19" title="19">    <span class="cf">return</span> all_from(<span class="st">&quot;.,;'</span><span class="ch">\&quot;</span><span class="st">?!-&quot;</span>, input_word)</a>
+<a class="sourceLine" id="cb1-20" title="20"></a>
+<a class="sourceLine" id="cb1-21" title="21"><span class="kw">def</span> search_words(words, key_set<span class="op">=</span>first_set):</a>
+<a class="sourceLine" id="cb1-22" title="22">    out <span class="op">=</span> []</a>
+<a class="sourceLine" id="cb1-23" title="23">    <span class="cf">for</span> word <span class="kw">in</span> words:</a>
+<a class="sourceLine" id="cb1-24" title="24">        <span class="cf">if</span> key_set(word) <span class="kw">and</span> <span class="bu">len</span>(word) <span class="op">&gt;</span> <span class="dv">1</span>:</a>
+<a class="sourceLine" id="cb1-25" title="25">            out.append(word)</a>
+<a class="sourceLine" id="cb1-26" title="26">    <span class="cf">return</span> out</a>
+<a class="sourceLine" id="cb1-27" title="27"></a>
+<a class="sourceLine" id="cb1-28" title="28"><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">&quot;__main__&quot;</span>:</a>
+<a class="sourceLine" id="cb1-29" title="29">    get_words <span class="op">=</span> <span class="dv">10</span></a>
+<a class="sourceLine" id="cb1-30" title="30">    fname <span class="op">=</span> <span class="st">&quot;/usr/share/dict/words&quot;</span></a>
+<a class="sourceLine" id="cb1-31" title="31">    wordlist <span class="op">=</span> <span class="bu">open</span>(fname, <span class="st">&quot;r&quot;</span>).read().split(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)</a>
+<a class="sourceLine" id="cb1-32" title="32"></a>
+<a class="sourceLine" id="cb1-33" title="33">    first <span class="op">=</span> search_words(wordlist, first_set)</a>
+<a class="sourceLine" id="cb1-34" title="34">    second <span class="op">=</span> search_words(wordlist, second_set)</a>
+<a class="sourceLine" id="cb1-35" title="35">    third <span class="op">=</span> search_words(wordlist, third_set)</a>
+<a class="sourceLine" id="cb1-36" title="36">    <span class="co">#fourth = search_words(wordlist, fourth_set) # need wordlist w/ punct.</span></a>
+<a class="sourceLine" id="cb1-37" title="37"></a>
+<a class="sourceLine" id="cb1-38" title="38">    <span class="bu">print</span> <span class="st">&quot;open: &quot;</span>, <span class="st">&quot; &quot;</span>.join(random.sample(first, get_words))</a>
+<a class="sourceLine" id="cb1-39" title="39">    <span class="bu">print</span> <span class="st">&quot;1st:  &quot;</span>, <span class="st">&quot; &quot;</span>.join(random.sample(second, get_words))</a>
+<a class="sourceLine" id="cb1-40" title="40">    <span class="bu">print</span> <span class="st">&quot;2nd:  &quot;</span>, <span class="st">&quot; &quot;</span>.join(random.sample(third, get_words))</a>
+<a class="sourceLine" id="cb1-41" title="41">    <span class="co">#print &quot;3rd:  &quot;, &quot; &quot;.join(random.sample(fourth, get_words))</span></a></code></pre></div>
 </article>
 
       </main>
